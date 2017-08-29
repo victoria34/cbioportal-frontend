@@ -3,11 +3,9 @@ import {
     default as getCanonicalMutationType, CanonicalMutationType,
     ProteinImpactType, getProteinImpactTypeFromCanonical
 } from "./getCanonicalMutationType";
-import {GeneticProfile, Mutation, SampleIdentifier} from "shared/api/generated/CBioPortalAPI";
+import {Mutation} from "shared/api/generated/CBioPortalAPI";
 import {MUTATION_STATUS_GERMLINE, GENETIC_PROFILE_UNCALLED_MUTATIONS_SUFFIX} from "shared/constants";
 import {findFirstMostCommonElt} from "./findFirstMostCommonElt";
-import {toSampleUuid} from "./UuidUtils";
-import {stringListToSet} from "./StringUtils";
 
 export interface IProteinImpactTypeColors
 {
@@ -136,31 +134,22 @@ export function getProteinStartPositionsByRange(data: Mutation[][], start: numbe
  */
 export function germlineMutationRate(hugoGeneSymbol:string,
                                      mutations: Mutation[],
-                                     geneticProfileIdToGeneticProfile:{[geneticProfileId:string]:GeneticProfile},
-                                     samples: SampleIdentifier[])
+                                     sampleIds: string[])
 {
-    if (mutations.length > 0 && samples.length > 0) {
-        const sampleIds = stringListToSet(samples.map(toSampleUuid));
+    if (mutations.length > 0 && sampleIds.length > 0) {
         const nrCasesGermlineMutation:number =
             _.chain(mutations)
-            .filter((m:Mutation) => {
-                const profile = geneticProfileIdToGeneticProfile[m.geneticProfileId];
-                if (profile) {
-                    return (
-                        m.gene.hugoGeneSymbol === hugoGeneSymbol &&
-                        new RegExp(MUTATION_STATUS_GERMLINE, "i").test(m.mutationStatus) &&
-                        // filter for given sample IDs
-                        !!sampleIds[toSampleUuid(profile.studyId, m.sampleId)]
-                    );
-                } else {
-                    return false;
-                }
-            })
-            .map(toSampleUuid)
+            .filter((m:Mutation) => (
+                m.gene.hugoGeneSymbol === hugoGeneSymbol &&
+                new RegExp(MUTATION_STATUS_GERMLINE, "i").test(m.mutationStatus) &&
+                // filter for given sample IDs
+                sampleIds.indexOf(m.sampleId) > -1
+            ))
+            .map('sampleId')
             .uniq()
             .value()
             .length;
-        return nrCasesGermlineMutation * 100.0 / samples.length;
+        return nrCasesGermlineMutation * 100.0 / sampleIds.length;
     } else {
         return 0;
     }
@@ -170,30 +159,21 @@ export function germlineMutationRate(hugoGeneSymbol:string,
  * Percentage of cases/samples with a somatic mutation in given gene.
  */
 export function somaticMutationRate(hugoGeneSymbol: string, mutations: Mutation[],
-                                    geneticProfileIdToGeneticProfile:{[geneticProfileId:string]:GeneticProfile},
-                                    samples: SampleIdentifier[]) {
-    if (mutations.length > 0 && samples.length > 0) {
-        const sampleIds = stringListToSet(samples.map(toSampleUuid));
+                                            sampleIds: string[]) {
+    if (mutations.length > 0 && sampleIds.length > 0) {
         return (
             _.chain(mutations)
-                .filter((m:Mutation) => {
-                    const profile = geneticProfileIdToGeneticProfile[m.geneticProfileId];
-                    if (profile) {
-                        return (
-                            m.gene.hugoGeneSymbol === hugoGeneSymbol &&
-                            !(new RegExp(MUTATION_STATUS_GERMLINE, "i").test(m.mutationStatus)) &&
-                            // filter for given sample IDs
-                            !!sampleIds[toSampleUuid(profile.studyId, m.sampleId)]
-                        );
-                    } else {
-                        return false;
-                    }
-                })
-                .map(toSampleUuid)
+                .filter((m:Mutation) => (
+                    m.gene.hugoGeneSymbol === hugoGeneSymbol &&
+                    !(new RegExp(MUTATION_STATUS_GERMLINE, "i").test(m.mutationStatus)) &&
+                    // filter for given sample IDs
+                    sampleIds.indexOf(m.sampleId) > -1
+                ))
+                .map('sampleId')
                 .uniq()
                 .value()
                 .length * 100.0 /
-                samples.length
+                sampleIds.length
         );
     } else {
         return 0;

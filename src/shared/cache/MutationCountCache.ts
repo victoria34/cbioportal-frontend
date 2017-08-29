@@ -1,34 +1,19 @@
 import client from "../api/cbioportalClientInstance";
-import LazyMobXCache, {AugmentedData} from "../lib/LazyMobXCache";
-import {GeneticProfile, MutationCount} from "../api/generated/CBioPortalAPI";
-import _ from "lodash";
+import LazyMobXCache from "../lib/LazyMobXCache";
+import {MutationCount} from "../api/generated/CBioPortalAPI";
 
-type Query = {
-    sampleId: string;
-    geneticProfileId: string;
-};
-
-function key(d:{geneticProfileId:string, sampleId:string}) {
-    return `${d.geneticProfileId}~${d.sampleId}`;
+function fetch(sampleIds:string[], geneticProfileId:string|undefined):Promise<MutationCount[]> {
+    if (!geneticProfileId) {
+        return Promise.reject("No mutation genetic profile id given");
+    } else {
+        return client.fetchMutationCountsInGeneticProfileUsingPOST({
+            geneticProfileId,
+            sampleIds
+        });
+    }
 }
-async function fetch(queries:Query[]):Promise<MutationCount[]> {
-    const groupedQueries = _.groupBy(queries, x=>x.geneticProfileId);
-    const geneticProfileIds = Object.keys(groupedQueries);
-    const results:MutationCount[][] = await Promise.all(geneticProfileIds.map(geneticProfileId=>{
-        const sampleIds = groupedQueries[geneticProfileId].map(d=>d.sampleId);
-        if (sampleIds.length > 0) {
-            return client.fetchMutationCountsInGeneticProfileUsingPOST({
-                geneticProfileId,
-                sampleIds
-            });
-        } else {
-            return Promise.resolve([]);
-        }
-    }));
-    return _.flatten(results);
-}
-export default class MutationCountCache extends LazyMobXCache<MutationCount, Query, string> {
-    constructor() {
-        super(key, key, fetch);
+export default class MutationCountCache extends LazyMobXCache<MutationCount, string> {
+    constructor(geneticProfileId:string|undefined) {
+        super(q=>q, (d:MutationCount)=>d.sampleId, fetch, geneticProfileId);
     }
 }

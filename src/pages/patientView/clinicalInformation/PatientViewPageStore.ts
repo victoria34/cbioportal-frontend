@@ -331,17 +331,6 @@ export class PatientViewPageStore {
         })
     }, []);
 
-    readonly geneticProfileIdToGeneticProfile = remoteData<{[geneticProfileId:string]:GeneticProfile}>({
-        await:()=>[this.geneticProfilesInStudy],
-        invoke:()=>{
-            return Promise.resolve(this.geneticProfilesInStudy.result.reduce((map:{[geneticProfileId:string]:GeneticProfile}, next:GeneticProfile)=>{
-                map[next.geneticProfileId] = next;
-                return map;
-            }, {}));
-        }
-    }, {});
-
-
     public readonly mrnaRankGeneticProfileId = remoteData({
         await: () => [
             this.geneticProfilesInStudy
@@ -398,18 +387,6 @@ export class PatientViewPageStore {
             return findGeneticProfileIdDiscrete(this.geneticProfilesInStudy);
         }
     });
-
-    readonly studyToGeneticProfileDiscrete = remoteData({
-        await: ()=>[this.geneticProfileIdDiscrete],
-        invoke:async ()=>{
-            // we just need it in this form for input to DiscreteCNACache
-            const ret:{[studyId:string]:GeneticProfile} = {};
-            if (this.geneticProfileIdDiscrete.result) {
-                ret[this.studyId] = await client.getGeneticProfileUsingGET({geneticProfileId:this.geneticProfileIdDiscrete.result});
-            }
-            return ret;
-        }
-    }, {});
 
     readonly darwinUrl = remoteData({
         await: () => [
@@ -603,7 +580,7 @@ export class PatientViewPageStore {
     }
 
     @cached get discreteCNACache() {
-        return new DiscreteCNACache(this.studyToGeneticProfileDiscrete.result);
+        return new DiscreteCNACache(this.geneticProfileIdDiscrete.result);
     }
 
     @cached get oncoKbEvidenceCache() {
@@ -619,11 +596,11 @@ export class PatientViewPageStore {
     }
 
     @cached get cancerTypeCache() {
-        return new CancerTypeCache();
+        return new CancerTypeCache(this.studyId);
     }
 
     @cached get mutationCountCache() {
-        return new MutationCountCache();
+        return new MutationCountCache(this.mutationGeneticProfileId.result);
     }
 
     @action setActiveTabId(id: string) {

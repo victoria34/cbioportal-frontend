@@ -5,7 +5,7 @@ import {
     DiscreteCNACacheDataType,
     default as DiscreteCNACache
 } from "shared/cache/DiscreteCNACache";
-import {GeneticProfile, Mutation} from "shared/api/generated/CBioPortalAPI";
+import {Mutation} from "shared/api/generated/CBioPortalAPI";
 import {default as TableCellStatusIndicator, TableCellStatus} from "shared/components/TableCellStatus";
 
 export default class DiscreteCNAColumnFormatter {
@@ -18,8 +18,8 @@ export default class DiscreteCNAColumnFormatter {
         "-2": "deepdel"
     };
 
-    public static renderFunction(data: Mutation[], geneticProfileIdToGeneticProfile: {[geneticProfileId:string]:GeneticProfile}, cache:DiscreteCNACache) {
-        const cnaData = DiscreteCNAColumnFormatter.getData(data, geneticProfileIdToGeneticProfile, cache);
+    public static renderFunction(data: Mutation[], cache:DiscreteCNACache) {
+        const cnaData = DiscreteCNAColumnFormatter.getData(data, cache);
         return (<DefaultTooltip
                 placement="left"
                 overlay={DiscreteCNAColumnFormatter.getTooltipContents(cnaData)}
@@ -30,12 +30,12 @@ export default class DiscreteCNAColumnFormatter {
         );
     }
 
-    public static getSortValue(data:Mutation[], geneticProfileIdToGeneticProfile: {[geneticProfileId:string]:GeneticProfile}, cache:DiscreteCNACache) {
-        return DiscreteCNAColumnFormatter.getTdValue(DiscreteCNAColumnFormatter.getData(data, geneticProfileIdToGeneticProfile, cache));
+    public static getSortValue(data:Mutation[], cache:DiscreteCNACache) {
+        return DiscreteCNAColumnFormatter.getTdValue(DiscreteCNAColumnFormatter.getData(data, cache));
     }
 
-    public static filter(data:Mutation[], geneticProfileIdToGeneticProfile: {[geneticProfileId:string]:GeneticProfile}, cache:DiscreteCNACache, filterString:string):boolean {
-        const cnaData = DiscreteCNAColumnFormatter.getData(data, geneticProfileIdToGeneticProfile, cache);
+    public static filter(data:Mutation[], cache:DiscreteCNACache, filterString:string):boolean {
+        const cnaData = DiscreteCNAColumnFormatter.getData(data, cache);
         if (cnaData && cnaData.data) {
             return (!!DiscreteCNAColumnFormatter.altToFilterString[cnaData.data.alteration])
                 && (DiscreteCNAColumnFormatter.altToFilterString[cnaData.data.alteration]
@@ -45,18 +45,13 @@ export default class DiscreteCNAColumnFormatter {
         }
     }
 
-    protected static getData(data:Mutation[] | undefined, geneticProfileIdToGeneticProfile: {[geneticProfileId:string]:GeneticProfile}, discreteCNACache:DiscreteCNACache):DiscreteCNACacheDataType | null {
-        if (!data || data.length === 0 || !discreteCNACache.isActive) {
+    protected static getData(data:Mutation[] | undefined, discreteCNACache:DiscreteCNACache):DiscreteCNACacheDataType | null {
+        if (!data || data.length === 0 || !discreteCNACache.geneticProfileIdDiscrete) {
             return null;
         }
         const sampleId = data[0].sampleId;
         const entrezGeneId = data[0].entrezGeneId;
-        const geneticProfile = geneticProfileIdToGeneticProfile[data[0].geneticProfileId];
-        if (geneticProfile) {
-            return discreteCNACache.get({sampleId, entrezGeneId, studyId: geneticProfile.studyId});
-        } else {
-            return null;
-        }
+        return discreteCNACache.get({sampleId, entrezGeneId});
     }
 
     protected static getTdValue(cacheDatum:DiscreteCNACacheDataType | null):number|null {
@@ -133,6 +128,11 @@ export default class DiscreteCNAColumnFormatter {
     }
 
     public static isVisible(cache:DiscreteCNACache): boolean {
-        return cache && cache.isActive;
+
+        if (cache) {
+            return !!cache.geneticProfileIdDiscrete;
+        }
+
+        return false;
     }
 }

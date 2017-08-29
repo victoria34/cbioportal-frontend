@@ -76,16 +76,15 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
         // TODO we should not be even calculating mskImpactGermlineConsentedPatientIds for studies other than msk impact
         if (this.props.store.gene.result &&
             this.props.store.gene.result.length > 0 &&
-            this.props.store.germlineConsentedSamples.result &&
+            this.props.store.sampleIds.result &&
             this.props.store.mutationData.isComplete &&
             this.props.store.mutationData.result.length > 0) {
             return (
                 <MutationRateSummary
                     hugoGeneSymbol={this.props.store.gene.result.hugoGeneSymbol}
-                    geneticProfileIdToGeneticProfile={this.props.store.geneticProfileIdToGeneticProfile}
                     mutations={this.props.store.mutationData.result}
-                    samples={this.props.store.samples.result!}
-                    germlineConsentedSamples={this.props.store.germlineConsentedSamples}
+                    sampleIds={this.props.store.sampleIds.result}
+                    germlineConsentedSampleIds={this.props.store.germlineConsentedSampleIds}
                 />
             );
         } else {
@@ -179,9 +178,9 @@ export default class MutationMapper extends React.Component<IMutationMapperProps
                             {!this.props.store.clinicalDataForSamples.isPending &&
                             !this.props.store.studiesForSamplesWithoutCancerTypeClinicalData.isPending && (
                                 <ResultsViewMutationTable
+                                    studyId={this.props.studyId}
                                     sampleIdToTumorType={this.props.store.sampleIdToTumorType}
                                     discreteCNACache={this.props.discreteCNACache}
-                                    geneticProfileIdToGeneticProfile={this.props.store.geneticProfileIdToGeneticProfile.result}
                                     oncoKbEvidenceCache={this.props.oncoKbEvidenceCache}
                                     pubMedCache={this.props.pubMedCache}
                                     mutationCountCache={this.props.mutationCountCache}
