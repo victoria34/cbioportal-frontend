@@ -6,6 +6,7 @@ import {observer} from "mobx-react";
 import {remoteData} from "../../shared/api/remoteData";
 import {action, computed, observable, reaction} from "mobx";
 import client from "shared/api/cbioportalInternalClientInstance";
+import {keepAlive} from "mobx-utils";
 
 
 function getMutatedGenes(query:string){
@@ -27,49 +28,35 @@ client.getAllGenesetsUsingGET({}).then(function(data){
 class StudyViewPageStore {
 
     constructor(){
-
+        //keepAlive(this.testMobxPromise, "result");
     }
 
     @observable filterTerm = "";
 
-    readonly mutatedGenes = remoteData({
 
-        await:()=>[
-            this.prelimData
-        ],
+    // readonly mutatedGenes = remoteData({
+    //
+    //     await:()=>[
+    //
+    //     ],
+    //
+    //     invoke:()=>{
+    //
+    //         return getMutatedGenes(this.filterTerm);
+    //
+    //     }
+    //
+    // });
 
-        invoke:()=>{
-
-            return getMutatedGenes(this.filterTerm);
-
-        }
-
-    });
-
-    readonly prelimData = remoteData({
-
-        invoke:()=>{
-
-            return getMutatedGenes(this.prelimParam);
-
-        }
-
-    });
-
-
-    readonly mutatedGenes = remoteData({
-
-        await:()=>[
-
-        ],
-
-        invoke:()=>{
-
-            return getMutatedGenes(this.filterTerm);
+    readonly testMobxPromise = remoteData({
+        invoke: ()=>{
+            // guaranteed no invoke dirtiness
+            console.log("TEST");
+            return Promise.resolve(4);
 
         }
-
     });
+
 
 }
 
@@ -88,10 +75,8 @@ export default class StudyViewPage extends React.Component<{}, {}> {
 
         this.store = new StudyViewPageStore();
 
-        const reaction1 = reaction(
-            () => this.store.filterTerm,
-            term => console.log("reaction 1:", term)
-        );
+        setInterval(()=>console.log(this.store.testMobxPromise.result), 1000);
+        //setTimeout(()=>console.log(this.store.testMobxPromise.result), 3000);
 
     }
 
@@ -104,6 +89,9 @@ export default class StudyViewPage extends React.Component<{}, {}> {
     }
 
     render(){
+
+        //var moo = (this.store.testMobxPromise.isPending);
+
         return (
 
             <div>
@@ -114,13 +102,6 @@ export default class StudyViewPage extends React.Component<{}, {}> {
                 />
                 <div>
 
-                    {
-
-                        (this.store.mutatedGenes.isPending) && (
-                            <div>Loading the mutated genes</div>
-                        )
-
-                    }
 
                 </div>
             </div>
