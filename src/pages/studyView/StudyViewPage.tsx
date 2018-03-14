@@ -25,34 +25,20 @@ client.getAllGenesetsUsingGET({}).then(function(data){
     console.log(data);
 });
 
+
 class StudyViewPageStore {
 
     constructor(){
-        //keepAlive(this.testMobxPromise, "result");
+        setInterval(()=>console.log(this.store.testMobxPromise.result), 1000);
     }
 
     @observable filterTerm = "";
-
-
-    // readonly mutatedGenes = remoteData({
-    //
-    //     await:()=>[
-    //
-    //     ],
-    //
-    //     invoke:()=>{
-    //
-    //         return getMutatedGenes(this.filterTerm);
-    //
-    //     }
-    //
-    // });
 
     readonly testMobxPromise = remoteData({
         invoke: ()=>{
             // guaranteed no invoke dirtiness
             console.log("TEST");
-            return Promise.resolve(4);
+            return Promise.resolve(this.filterTerm);
 
         }
     });
@@ -75,8 +61,8 @@ export default class StudyViewPage extends React.Component<{}, {}> {
 
         this.store = new StudyViewPageStore();
 
+        // this causes invoke to run over and over when it would seem it should only compute once (as it does if we subscribe to it in view
         setInterval(()=>console.log(this.store.testMobxPromise.result), 1000);
-        //setTimeout(()=>console.log(this.store.testMobxPromise.result), 3000);
 
     }
 
@@ -89,8 +75,6 @@ export default class StudyViewPage extends React.Component<{}, {}> {
     }
 
     render(){
-
-        //var moo = (this.store.testMobxPromise.isPending);
 
         return (
 
