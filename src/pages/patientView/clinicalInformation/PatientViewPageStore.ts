@@ -38,12 +38,13 @@ import {
     fetchMutSigData, findMrnaRankMolecularProfileId, mergeDiscreteCNAData, fetchSamplesForPatient, fetchClinicalData,
     fetchCopyNumberSegments, fetchClinicalDataForPatient, makeStudyToCancerTypeMap,
     fetchCivicGenes, fetchCnaCivicGenes, fetchCivicVariants, groupBySampleId, findSamplesWithoutCancerTypeClinicalData,
-    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenes
+    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenes, fetchCurationMatchedTrials
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";
 import {stringListToSet} from "../../../shared/lib/StringUtils";
 import {Gene as OncoKbGene} from "../../../shared/api/generated/OncoKbAPI";
 import {MutationTableDownloadDataFetcher} from "shared/lib/MutationTableDownloadDataFetcher";
+import { MatchTrialResult } from "../../../shared/api/generated/MatchminerCurationAPI";
 
 type PageMode = 'patient' | 'sample';
 
@@ -243,7 +244,7 @@ export class PatientViewPageStore {
                             return getPathologyReport(patientId, i+1);
                         }, () => reports);
                 }
-                
+
                return getPathologyReport(this.patientId, 0);
             } else {
                 return [];
@@ -565,6 +566,26 @@ export class PatientViewPageStore {
             // fail silently, leave the error handling responsibility to the data consumer
         }
     }, ONCOKB_DEFAULT);
+
+    readonly curationMatchedTrials = remoteData<MatchTrialResult | undefined>({
+        await: () => [
+            this.mutationData,
+            this.clinicalDataPatient,
+            this.clinicalDataForSamples
+        ],
+        invoke: async() => {
+            if (this.mutationData.isComplete) {
+                return fetchCurationMatchedTrials(
+                    this.patientId,
+                    this.clinicalDataPatient.result,
+                    this.clinicalDataForSamples.result,
+                    this.mutationData);
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently, leave the error handling responsibility to the data consumer
+        }
+    }, undefined);
 
     readonly cnaCivicGenes = remoteData<ICivicGene | undefined>({
         await: () => [

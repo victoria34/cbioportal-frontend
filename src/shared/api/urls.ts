@@ -93,6 +93,9 @@ export function getGenomeNexusApiUrl() {
         return undefined;
     }
 }
+export function getMatchminerCurationApiUrl() {
+    return cbioUrl(`proxy/matchminer-match.herokuapp.com`);
+}
 export function getPdbAnnotationApiUrl() {
     return 'https://cbioportal.mskcc.org/pdb-annotation';
 }

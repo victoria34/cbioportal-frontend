@@ -17,6 +17,7 @@ import {
     GisticToGene, Gistic, MutSig
 } from "shared/api/generated/CBioPortalAPIInternal";
 import oncokbClient from "shared/api/oncokbClientInstance";
+import matchminerCurationClient from "shared/api/matchminerCurationClientInstance";
 import civicClient from "shared/api/civicClientInstance";
 import genomeNexusClient from "shared/api/genomeNexusClientInstance";
 import {
@@ -38,6 +39,9 @@ import {ICivicGeneData, ICivicVariant, ICivicGene} from "shared/model/Civic.ts";
 import {MOLECULAR_PROFILE_MUTATIONS_SUFFIX, MOLECULAR_PROFILE_UNCALLED_MUTATIONS_SUFFIX} from "shared/constants";
 import GenomeNexusAPI from "shared/api/generated/GenomeNexusAPI";
 import {AlterationTypeConstants} from "../../pages/resultsView/ResultsViewPageStore";
+import {
+    Clinical, default as MatchminerCurationAPI, Genomic, Patient
+} from "shared/api/generated/MatchminerCurationAPI";
 
 export const ONCOKB_DEFAULT: IOncoKbData = {
     uniqueSampleKeyToTumorType : {},
@@ -588,7 +592,7 @@ export async function fetchCivicGenes(mutationData?:MobxPromise<Mutation[]>,
     mutationDataResult.forEach(function(mutation: Mutation) {
         queryHugoSymbols.add(mutation.gene.hugoGeneSymbol);
     });
-    
+
     let querySymbols: Array<string> = Array.from(queryHugoSymbols);
 
     let civicGenes: ICivicGene = await getCivicGenes(querySymbols);
@@ -600,15 +604,15 @@ export async function fetchCnaCivicGenes(discreteCNAData:MobxPromise<DiscreteCop
 {
     if (discreteCNAData.result && discreteCNAData.result.length > 0) {
         let queryHugoSymbols: Set<string> = new Set([]);
-        
+
         discreteCNAData.result.forEach(function(cna: DiscreteCopyNumberData) {
             queryHugoSymbols.add(cna.gene.hugoGeneSymbol);
         });
-        
+
         let querySymbols: Array<string> = Array.from(queryHugoSymbols);
-    
+
         let civicGenes: ICivicGene = (await getCivicGenes(querySymbols));
-    
+
         return civicGenes;
     } else {
         return {};
@@ -884,4 +888,100 @@ export async function getHierarchyData(
         sampleListId: string|undefined,  client:CBioPortalAPIInternal = internalClient) {
     return await client.fetchGenesetHierarchyInfoUsingPOST({geneticProfileId, percentile, scoreThreshold,
         pvalueThreshold, sampleListId});
+}
+
+export async function fetchCurationMatchedTrials(patientId: string, clinicalDataPatient: Array<ClinicalData>,
+    clinicalDataSample: Array<ClinicalData>, mutationData: MobxPromise<Mutation[]>,
+    client:MatchminerCurationAPI = matchminerCurationClient) {
+    let clinicalObj = getClinicalObj(clinicalDataPatient, clinicalDataSample);
+    let genomicArray = [];
+    if (mutationData.result) {
+        for (const mutation of mutationData.result) {
+            genomicArray.push(getGenomicObj(mutation));
+        }
+    }
+    const patient: Patient = {
+        id: patientId,
+        clinical: clinicalObj,
+        genomics: genomicArray
+    };
+    return await client.matchTrialUsingPOST({body: patient});
+}
+
+function getGenomicObj(data: Mutation): Genomic {
+    let genomic: Genomic = {
+        sampleId: '',
+        trueHugoSymbol: '',
+        trueProteinChange: '',
+        alleleFraction: 0,
+        canonicalStand: '',
+        chromosome: '',
+        cnvCall: '',
+        position: '',
+        referenceAllele: '',
+        tier: 0,
+        trueCdnaChange: '',
+        trueTranscriptExon: 0,
+        trueVariantClassification: '',
+        variantCategory: '',
+        wildtype: false
+    };
+    genomic.sampleId = data.sampleId;
+    genomic.trueHugoSymbol = data.gene.hugoGeneSymbol;
+    genomic.trueProteinChange = data.proteinChange;
+    genomic.referenceAllele = data.referenceAllele;
+    genomic.chromosome = data.gene.chromosome;
+    genomic.trueVariantClassification = data.mutationType;
+    if (data.startPosition === data.endPosition) {
+        genomic.position = data.startPosition.toString();
+    }
+    return genomic;
+}
+
+function getClinicalObj(clinicalData: Array<ClinicalData>, samples: Array<ClinicalData>): Clinical {
+    let clinical: Clinical = {
+        sampleId: '',
+        oncotreePrimaryDiagnosisName: '',
+        gender: '',
+        vitalStatus: '',
+        birthDate: '',
+        firstLast: '',
+        mrn: 0,
+        ordPhysicianEmail: '',
+        ordPhysicianName: '',
+        reportDate: ''
+    };
+    let uniqSamplesBySampleId = _.uniqBy(samples, 'sampleId');
+    if (uniqSamplesBySampleId.length === 1) {
+        clinical.sampleId = uniqSamplesBySampleId[0].sampleId;
+    } else {
+        console.warn("The patient " + uniqSamplesBySampleId[0].patientId + " has multiple sampleId.");
+    }
+    _.each(clinicalData, (attribute) => {
+        if (attribute.clinicalAttributeId === 'AGE') {
+            clinical.birthDate = getBirthDate(attribute.value);
+        }
+        if (attribute.clinicalAttributeId === 'VITAL_STATUS') {
+            clinical.vitalStatus = attribute.value.toLowerCase();
+        }
+        if (attribute.clinicalAttributeId === 'SEX') {
+            clinical.gender = attribute.value;
+        }
+    });
+    _.each(samples, function(attribute) {
+        if (attribute.clinicalAttributeId === 'CANCER_TYPE') {
+            clinical.oncotreePrimaryDiagnosisName = attribute.value;
+        }
+    });
+    return clinical;
+}
+
+function getBirthDate(data: string): string {
+    let today = new Date();
+    let year = today.getFullYear() - parseInt(data);
+    let month = (today.getMonth() + 1).toString();
+    let date = today.getUTCDate().toString();
+    if (month.length === 1) { month = '0' + month; }
+    if (date.length === 1) { date = '0' + date; }
+    return year.toString() + '-' + month + '-' + date;
 }

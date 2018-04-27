@@ -1,0 +1,312 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "matchminerCurate API documentation",
+    "version": "0.0.1",
+    "title": "matchminerCurate API",
+    "contact": {},
+    "license": {}
+  },
+  "host": "matchminer-match.herokuapp.com",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "trials-controller",
+      "description": "Trials Resource"
+    }
+  ],
+  "paths": {
+    "/trials/create": {
+      "post": {
+        "tags": [
+          "trials-controller"
+        ],
+        "summary": "loadTrial",
+        "description": "Load trial data into Mongo DB.",
+        "operationId": "loadTrialUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "A trial json object.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TrialJson"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Load the trial successfully!"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Load the trial failed!"
+          }
+        }
+      }
+    },
+    "/trials/match": {
+      "post": {
+        "tags": [
+          "trials-controller"
+        ],
+        "summary": "matchTrial",
+        "description": "Match trial in Mongo DB to patient",
+        "operationId": "matchTrialUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Clinical and genomic data of a patient.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Patient"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Match trials successfully!",
+            "schema": {
+              "$ref": "#/definitions/MatchTrialResult"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Match trials failed!"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Clinical": {
+      "type": "object",
+      "required": [
+        "sampleId"
+      ],
+      "properties": {
+        "birthDate": {
+          "type": "string",
+          "example": "1975-03-01",
+          "pattern": "/(\\d{4}[-]\\d{2}[-]\\d{2})/"
+        },
+        "firstLast": {
+          "type": "string",
+          "example": " "
+        },
+        "gender": {
+          "type": "string",
+          "example": "Male"
+        },
+        "mrn": {
+          "type": "integer",
+          "format": "int32",
+          "example": " "
+        },
+        "oncotreePrimaryDiagnosisName": {
+          "type": "string",
+          "example": "Melanoma"
+        },
+        "ordPhysicianEmail": {
+          "type": "string",
+          "example": " "
+        },
+        "ordPhysicianName": {
+          "type": "string",
+          "example": " "
+        },
+        "reportDate": {
+          "type": "string",
+          "example": "2018-03-01",
+          "pattern": "/(\\d{4}[-]\\d{2}[-]\\d{2})/"
+        },
+        "sampleId": {
+          "type": "string",
+          "example": "TCGA-D3-A5GT-01"
+        },
+        "vitalStatus": {
+          "type": "string",
+          "example": " "
+        }
+      }
+    },
+    "Genomic": {
+      "type": "object",
+      "required": [
+        "sampleId"
+      ],
+      "properties": {
+        "alleleFraction": {
+          "type": "number",
+          "format": "double",
+          "example": " "
+        },
+        "canonicalStand": {
+          "type": "string",
+          "example": " "
+        },
+        "chromosome": {
+          "type": "string",
+          "example": " "
+        },
+        "cnvCall": {
+          "type": "string",
+          "example": " "
+        },
+        "position": {
+          "type": "string",
+          "example": " "
+        },
+        "referenceAllele": {
+          "type": "string",
+          "example": " "
+        },
+        "sampleId": {
+          "type": "string",
+          "example": "TCGA-D3-A5GT-01"
+        },
+        "tier": {
+          "type": "integer",
+          "format": "int32",
+          "example": " "
+        },
+        "trueCdnaChange": {
+          "type": "string",
+          "example": " "
+        },
+        "trueHugoSymbol": {
+          "type": "string",
+          "example": "BRAF"
+        },
+        "trueProteinChange": {
+          "type": "string",
+          "example": "V600E"
+        },
+        "trueTranscriptExon": {
+          "type": "integer",
+          "format": "int32",
+          "example": " "
+        },
+        "trueVariantClassification": {
+          "type": "string",
+          "example": " "
+        },
+        "variantCategory": {
+          "type": "string",
+          "example": " "
+        },
+        "wildtype": {
+          "type": "boolean",
+          "example": false
+        }
+      }
+    },
+    "MatchTrialResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "trials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Trial"
+          }
+        }
+      }
+    },
+    "Patient": {
+      "type": "object",
+      "required": [
+        "clinical",
+        "genomics",
+        "id"
+      ],
+      "properties": {
+        "clinical": {
+          "$ref": "#/definitions/Clinical"
+        },
+        "genomics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Genomic"
+          }
+        },
+        "id": {
+          "type": "string",
+          "example": "TCGA-D3-A5GT"
+        }
+      }
+    },
+    "Trial": {
+      "type": "object",
+      "properties": {
+        "longTitle": {
+          "type": "string"
+        },
+        "nctId": {
+          "type": "string"
+        },
+        "phase": {
+          "type": "string"
+        },
+        "shortTitle": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "treatmentList": {
+          "type": "string"
+        }
+      }
+    },
+    "TrialJson": {
+      "type": "object",
+      "required": [
+        "trial"
+      ],
+      "properties": {
+        "trial": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
