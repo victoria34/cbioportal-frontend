@@ -48,22 +48,22 @@ export default class TrialMatchList extends React.Component<ITrialMatchListProps
                             <div className="container" key={idx} style={styles.container}>
                                 <div className="row" style={styles.row}>
                                     <div className="col-md-12">
-                                        <a href="https://matchminer-match.herokuapp.com">{d.nctId}</a> - {d.shortTitle}
+                                        <a href="https://matchminer-match.herokuapp.com"><b>{d.nctId}</b></a> - {d.shortTitle}
                                     </div>
                                 </div>
                                 <div className="row" style={styles.row}>
                                     <div className="col-md-12">
-                                        <span style={styles.span}>Long Title:</span>
+                                        <span style={styles.span}><b>Long Title:</b></span>
                                         <span>{d.longTitle}</span>
                                     </div>
                                 </div>
                                 <div className="row" style={styles.row}>
                                     <div className="col-md-6" style={styles.colMd6}>
-                                        <span style={styles.span}>Phase:</span>
+                                        <span style={styles.span}><b>Phase:</b></span>
                                         <span>{d.phase}</span>
                                     </div>
                                     <div className="col-md-6" style={styles.colMd6}>
-                                        <span style={styles.span}>Status:</span>
+                                        <span style={styles.span}><b>Status:</b></span>
                                         <span>{d.status}</span>
                                     </div>
                                 </div>
