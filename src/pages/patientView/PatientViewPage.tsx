@@ -33,6 +33,7 @@ import { getMouseIcon } from './SVGIcons';
 
 import './patient.scss';
 import IFrameLoader from "../../shared/components/iframeLoader/IFrameLoader";
+import TrialMatchList from "./trialMatch/TrialMatchList";
 
 const patientViewPageStore = new PatientViewPageStore();
 
@@ -463,6 +464,18 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         <div style={{position: "relative"}}>
                             <IFrameLoader height={700} url={  `http://cancer.digitalslidearchive.net/index_mskcc.php?slide_name=${patientViewPageStore.patientId}` } />
                         </div>
+                    </MSKTab>
+
+                    <MSKTab key={6} id="trialMatchTab" linkText="Trial Match"
+                            hide={(patientViewPageStore.curationMatchedTrials.isComplete && !patientViewPageStore.curationMatchedTrials.result)}
+                            loading={patientViewPageStore.curationMatchedTrials.isPending}
+                    >
+                        {
+                            (patientViewPageStore.curationMatchedTrials.isComplete)
+                            && (
+                            <TrialMatchList matchTrialResult={patientViewPageStore.curationMatchedTrials.result!}/>
+                            )
+                        }
                     </MSKTab>
 
                     </MSKTabs>
