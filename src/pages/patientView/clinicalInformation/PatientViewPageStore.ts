@@ -571,7 +571,8 @@ export class PatientViewPageStore {
         await: () => [
             this.mutationData,
             this.clinicalDataPatient,
-            this.clinicalDataForSamples
+            this.clinicalDataForSamples,
+            this.studies
         ],
         invoke: async() => {
             if (this.mutationData.isComplete) {
@@ -579,7 +580,8 @@ export class PatientViewPageStore {
                     this.patientId,
                     this.clinicalDataPatient.result,
                     this.clinicalDataForSamples.result,
-                    this.mutationData);
+                    this.mutationData,
+                    this.studies);
             }
         },
         onError: (err: Error) => {

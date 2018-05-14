@@ -891,7 +891,7 @@ export async function getHierarchyData(
 }
 
 export async function fetchCurationMatchedTrials(patientId: string, clinicalDataPatient: Array<ClinicalData>,
-    clinicalDataSample: Array<ClinicalData>, mutationData: MobxPromise<Mutation[]>,
+    clinicalDataSample: Array<ClinicalData>, mutationData: MobxPromise<Mutation[]>, studies: MobxPromise<CancerStudy[]>,
     client:MatchminerCurationAPI = matchminerCurationClient) {
     let clinicalObj = getClinicalObj(clinicalDataPatient, clinicalDataSample);
     let genomicArray = [];
@@ -899,6 +899,10 @@ export async function fetchCurationMatchedTrials(patientId: string, clinicalData
         for (const mutation of mutationData.result) {
             genomicArray.push(getGenomicObj(mutation));
         }
+    }
+    if (clinicalObj.oncotreePrimaryDiagnosisName === '' && studies.result && studies.result.length === 1) {
+        // We use cancer sub_type in here.
+        clinicalObj.oncotreePrimaryDiagnosisName = studies.result[0].cancerType.name;
     }
     const patient: Patient = {
         id: patientId,
@@ -964,11 +968,16 @@ function getClinicalObj(clinicalData: Array<ClinicalData>, samples: Array<Clinic
         if (attribute.clinicalAttributeId === 'VITAL_STATUS') {
             clinical.vitalStatus = attribute.value.toLowerCase();
         }
-        if (attribute.clinicalAttributeId === 'SEX') {
+        if (attribute.clinicalAttributeId === 'SEX' || attribute.clinicalAttributeId === 'GENDER') {
             clinical.gender = attribute.value;
         }
     });
+    // set patient as adult (age >= 18) by default
+    if (clinical.birthDate === '') {
+        clinical.birthDate = getBirthDate('18');
+    }
     _.each(samples, function(attribute) {
+        // TODO: change "CANCER_TYPE"(main_type) to "CANCER_TYPE_DETAILED"(sub_type)
         if (attribute.clinicalAttributeId === 'CANCER_TYPE') {
             clinical.oncotreePrimaryDiagnosisName = attribute.value;
         }
