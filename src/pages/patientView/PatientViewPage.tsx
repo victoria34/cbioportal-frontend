@@ -465,6 +465,11 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         </div>
                     </MSKTab>
 
+                    <MSKTab key={6} id="trialMatchTab" linkText="Trial Match"
+                    >
+                        <IFrameLoader height={1000} url={  `http://localhost:8001/#/dashboard/patients/5a1de4afd11c541e307203a7` } />
+                    </MSKTab>
+
                     </MSKTabs>
 
                     </Then>
