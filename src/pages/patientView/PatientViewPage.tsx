@@ -33,8 +33,9 @@ import "./patient.scss";
 import IFrameLoader from "../../shared/components/iframeLoader/IFrameLoader";
 import {
     getDigitalSlideArchiveIFrameUrl,
-    getSampleViewUrl,
-    getWholeSlideViewerUrl
+    getWholeSlideViewerUrl,
+    getDigitalSlideArchiveIFrameUrl,
+    getSampleViewUrl
 } from "../../shared/api/urls";
 import {PageLayout} from "../../shared/components/PageLayout/PageLayout";
 import Helmet from "react-helmet";
@@ -542,6 +543,11 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         </div>
                     </MSKTab>
                     )}
+
+                    <MSKTab key={6} id="trialMatchTab" linkText="Trial Match">
+                        <IFrameLoader height={1000} url={  getMatchMinerTrialMatchIFrameUrl(patientViewPageStore.patientId) } />
+                        {/*<IFrameLoader height={1000} url={  `http://localhost:8001/#/dashboard/patients/5a1de4afd11c541e307203a7` } />*/}
+                    </MSKTab>
 
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
                         {/*<div className="clearfix">*/}

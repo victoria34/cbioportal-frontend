@@ -230,3 +230,7 @@ export function getNCBIlink(pathnameOrParams?: BuildUrlParams | string): string 
         ...params
     });
 }
+
+var escapeRegExp = function(str: string) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+};
