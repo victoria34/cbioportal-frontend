@@ -100,5 +100,6 @@ export interface IServerConfig {
     "user_email_address": string;
     "sessionServiceEnabled": boolean;
     "session_url_length_threshold":string;
+    "matchminer_url": string|null;
 
 }

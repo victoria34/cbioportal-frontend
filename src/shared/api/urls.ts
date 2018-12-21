@@ -208,3 +208,36 @@ export function getDocsUrl(sourceUrl:string,docsBaseUrl?:string): string {
         return docsBaseUrl + "/" + sourceUrl;
     }
 }
+
+export function getMatchMinerTrialMatchIFrameUrl(patientId:string){
+    getMatchMinerPatientIndex(patientId).then(res, function() {
+        console.log(res);
+        return AppConfig.serverConfig.matchminer_url + '#/dashboard/patients/' + res;
+    });
+
+}
+
+var escapeRegExp = function(str: string) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+};
+
+function getMatchMinerPatientIndex(patientId:string) {
+    const prom = new Promise((resolve, reject)=>{
+        var query = {
+            '$or': [{
+                'MRN': {
+                    '$regex': '^' + escapeRegExp(patientId) + '.*',
+                    '$options': "si"
+                }
+            }]
+        };
+        $.get(
+            AppConfig.serverConfig.matchminer_url + 'api/clinical?where=' + JSON.stringify(query),
+            function(data) {
+                var patient = data['_items'][0];
+                resolve(patient['_id']);
+            });
+    });
+    return prom;
+
+}
