@@ -287,7 +287,7 @@ export class PatientViewPageStore {
                             return getPathologyReport(patientId, i+1);
                         }, () => reports);
                 }
-                
+
                return getPathologyReport(this.patientId, 0);
             } else {
                 return Promise.resolve([]);
@@ -663,6 +663,38 @@ export class PatientViewPageStore {
             this.discreteCNAData
         ],
         invoke: async() => fetchCopyNumberData(this.discreteCNAData, this.molecularProfileIdDiscrete)
+    }, []);
+
+    readonly trialMatches = remoteData<Array<ITrialMatch>>({
+        invoke: () => {
+            return postMatchMinerTrialMatches({mrn: this.patientId});
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
+    readonly trials = remoteData<Array<ITrial>>({
+        await: () => [
+            this.trialMatches
+        ],
+        invoke: async () => {
+            if (this.trialMatches.result.length > 0) {
+                let nctIds: Array<string> = [];
+                _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
+                    nctIds.push(trialMatch.nctId);
+                });
+                nctIds = _.uniq(nctIds);
+                console.log(nctIds);
+                console.log(getMatchMinerTrials(nctIds));
+                return await getMatchMinerTrials(nctIds);
+            } else {
+                return [];
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
     }, []);
 
     @computed get sampleIds(): string[]
