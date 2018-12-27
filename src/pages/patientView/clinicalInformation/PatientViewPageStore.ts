@@ -35,19 +35,24 @@ import MutationCountCache from "shared/cache/MutationCountCache";
 import AppConfig from "appConfig";
 import {
     findMolecularProfileIdDiscrete, ONCOKB_DEFAULT, fetchOncoKbData,
-    fetchCnaOncoKbData, mergeMutations, fetchMyCancerGenomeData, fetchMutationalSignatureData, fetchMutationalSignatureMetaData,
-    fetchCosmicData, fetchMutationData, fetchDiscreteCNAData, generateUniqueSampleKeyToTumorTypeMap, findMutationMolecularProfileId,
+    fetchCnaOncoKbData, mergeMutations, fetchMyCancerGenomeData, fetchMutationalSignatureData,
+    fetchMutationalSignatureMetaData,
+    fetchCosmicData, fetchMutationData, fetchDiscreteCNAData, generateUniqueSampleKeyToTumorTypeMap,
+    findMutationMolecularProfileId,
     findUncalledMutationMolecularProfileId, mergeMutationsIncludingUncalled, fetchGisticData, fetchCopyNumberData,
     fetchMutSigData, findMrnaRankMolecularProfileId, mergeDiscreteCNAData, fetchSamplesForPatient, fetchClinicalData,
     fetchCopyNumberSegments, fetchClinicalDataForPatient, makeStudyToCancerTypeMap,
     fetchCivicGenes, fetchCnaCivicGenes, fetchCivicVariants, groupBySampleId, findSamplesWithoutCancerTypeClinicalData,
-    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData
+    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData,
+    getMatchMinerTrials
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";
 import {stringListToSet} from "../../../shared/lib/StringUtils";
 import {MutationTableDownloadDataFetcher} from "shared/lib/MutationTableDownloadDataFetcher";
 import { VariantAnnotation } from 'shared/api/generated/GenomeNexusAPI';
 import { fetchVariantAnnotationsIndexedByGenomicLocation } from 'shared/lib/MutationAnnotator';
+import { postMatchMinerTrial, postMatchMinerTrialMatches } from "../../../shared/api/MatchMinerAPI";
+import { ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
 
 type PageMode = 'patient' | 'sample';
 
@@ -250,6 +255,8 @@ export class PatientViewPageStore {
                 const rawPdfUrl = "https://github.com/inodb/datahub/raw/a0d36d77b242e32cda3175127de73805b028f595/tcga/pathology_reports";
                 const reports: PathologyReportPDF[] = [];
 
+
+
                 // keep checking if patient has more reports recursively
                 function getPathologyReport(patientId:string, i:number):any {
                     return request.get(`${pathLinkUrl}/${patientId}.${i}`).then(function(resp){
@@ -260,7 +267,7 @@ export class PatientViewPageStore {
                             return getPathologyReport(patientId, i+1);
                         }, () => reports);
                 }
-                
+
                return getPathologyReport(this.patientId, 0);
             } else {
                 return Promise.resolve([]);
@@ -579,6 +586,48 @@ export class PatientViewPageStore {
             // fail silently, leave the error handling responsibility to the data consumer
         }
     }, ONCOKB_DEFAULT);
+
+
+    // readonly trialMatch = remoteData<ITrialMatch[]>({
+    //     invoke: () => {
+    //         return postMatchMinerTrialMatches({mrn: this.patientId});
+    //     },
+    //     onError: (err: Error) => {
+    //         // fail silently
+    //     }
+    // }, []);
+
+    readonly trialMatches = remoteData<Array<ITrialMatch>>({
+        invoke: () => {
+            return postMatchMinerTrialMatches({mrn: this.patientId});
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
+    readonly trials = remoteData<Array<ITrial>>({
+        await: () => [
+            this.trialMatches
+        ],
+        invoke: async () => {
+            if (this.trialMatches.result.length > 0) {
+                let nctIds: Array<string> = [];
+                _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
+                    nctIds.push(trialMatch.nctId);
+                });
+                nctIds = _.uniq(nctIds);
+                console.log(nctIds);
+                console.log(getMatchMinerTrials(nctIds));
+                return await getMatchMinerTrials(nctIds);
+            } else {
+                return [];
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
 
     readonly cnaCivicGenes = remoteData<ICivicGene | undefined>({
         await: () => [

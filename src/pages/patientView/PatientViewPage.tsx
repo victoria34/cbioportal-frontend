@@ -32,8 +32,7 @@ import {getMouseIcon} from "./SVGIcons";
 import "./patient.scss";
 import IFrameLoader from "../../shared/components/iframeLoader/IFrameLoader";
 import {
-    getDigitalSlideArchiveIFrameUrl, getMatchMinerTrialMatchIFrameUrl,
-    getSampleViewUrl
+    getDigitalSlideArchiveIFrameUrl, getSampleViewUrl
 } from "../../shared/api/urls";
 import {PageLayout} from "../../shared/components/PageLayout/PageLayout";
 import Helmet from "react-helmet";
@@ -43,6 +42,7 @@ import {showCustomTab} from "../../shared/lib/customTabs";
 import {StudyLink} from "../../shared/components/StudyLink/StudyLink";
 import WindowStore from "shared/components/window/WindowStore";
 import {QueryParams} from "url";
+import MatchMiner from "./matchMiner/MatchMiner";
 
 const patientViewPageStore = new PatientViewPageStore();
 
@@ -180,6 +180,10 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
 
     private shouldShowPathologyReport(patientViewPageStore: PatientViewPageStore): boolean {
         return patientViewPageStore.pathologyReport.isComplete && patientViewPageStore.pathologyReport.result.length > 0;
+    }
+    private shouldShowTrialMatch(patientViewPageStore: PatientViewPageStore): boolean {
+        return patientViewPageStore.trialMatches.isComplete && patientViewPageStore.trialMatches.result.length > 0 &&
+            patientViewPageStore.trials.isComplete && patientViewPageStore.trials.result.length > 0;
     }
 
     hideTissueImageTab(){
@@ -505,9 +509,9 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         </div>
                     </MSKTab>
 
-                    <MSKTab key={6} id="trialMatchTab" linkText="Trial Match">
-                        <IFrameLoader height={1000} url={  getMatchMinerTrialMatchIFrameUrl(patientViewPageStore.patientId) } />
-                        {/*<IFrameLoader height={1000} url={  `http://localhost:8001/#/dashboard/patients/5a1de4afd11c541e307203a7` } />*/}
+                    <MSKTab key={6} id="trialMatchTab" linkText="Trial Match"
+                            hide={!this.shouldShowTrialMatch(patientViewPageStore)}>
+                        <MatchMiner trialMatches={patientViewPageStore.trialMatches.result} trials={patientViewPageStore.trials.result}/>
                     </MSKTab>
 
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
