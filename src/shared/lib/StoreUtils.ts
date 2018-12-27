@@ -41,6 +41,8 @@ import GenomeNexusAPI from "shared/api/generated/GenomeNexusAPI";
 import {AlterationTypeConstants} from "../../pages/resultsView/ResultsViewPageStore";
 import {stringListToIndexSet} from "./StringUtils";
 import {GeneticTrackDatum_Data} from "../components/oncoprint/Oncoprint";
+import { getMatchMinerTrial } from "../api/MatchMinerAPI";
+import { ITrial } from "../model/MatchMiner";
 
 export const ONCOKB_DEFAULT: IOncoKbData = {
     uniqueSampleKeyToTumorType : {},
@@ -688,15 +690,15 @@ export async function fetchCnaCivicGenes(discreteCNAData:MobxPromise<DiscreteCop
 {
     if (discreteCNAData.result && discreteCNAData.result.length > 0) {
         let entrezGeneSymbols: Set<number> = new Set([]);
-        
+
         discreteCNAData.result.forEach(function(cna: DiscreteCopyNumberData) {
             entrezGeneSymbols.add(cna.gene.entrezGeneId);
         });
-        
+
         let querySymbols: Array<number> = Array.from(entrezGeneSymbols);
-    
+
         let civicGenes: ICivicGene = (await getCivicGenes(querySymbols));
-    
+
         return civicGenes;
     } else {
         return {};
@@ -972,4 +974,10 @@ export async function getHierarchyData(
         sampleListId: string|undefined,  client:CBioPortalAPIInternal = internalClient) {
     return await client.fetchGenesetHierarchyInfoUsingPOST({geneticProfileId, percentile, scoreThreshold,
         pvalueThreshold, sampleListId});
+}
+
+export async function getMatchMinerTrials(nctIds: Array<string>) {
+    const dataPromises = nctIds.map(nctId => getMatchMinerTrial(nctId));
+    const results:Array<ITrial> = await Promise.all(dataPromises);
+    return results;
 }
