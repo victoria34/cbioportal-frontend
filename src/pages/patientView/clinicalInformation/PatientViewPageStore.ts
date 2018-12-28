@@ -617,8 +617,6 @@ export class PatientViewPageStore {
                     nctIds.push(trialMatch.nctId);
                 });
                 nctIds = _.uniq(nctIds);
-                console.log(nctIds);
-                console.log(getMatchMinerTrials(nctIds));
                 return await getMatchMinerTrials(nctIds);
             } else {
                 return [];

@@ -3,6 +3,7 @@ import { If, Then, Else } from 'react-if';
 import * as _ from 'lodash';
 import {observer} from "mobx-react";
 import { ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
+import styles from './style/MatchMiner.module.scss';
 
 export type IMatchMinerProps = {
     trialMatches:Array<ITrialMatch>;
@@ -10,98 +11,104 @@ export type IMatchMinerProps = {
 }
 
 @observer
-export default class MatchMiner extends React.Component<IMatchMinerProps> {
+export default class MatchMiner extends React.Component<IMatchMinerProps, {detailedTrialMatches: any}> {
 
     constructor(props: IMatchMinerProps){
-
         super();
-
-        this.state = {};
-
-        // this.handleSelection = this.handleSelection.bind(this);
-
-        // this.styles = {
-        //     container: {
-        //         lineHeight: 1.5,
-        //         width: `auto`,
-        //         backgroundColor: `#fff`,
-        //         paddingTop: 10,
-        //         paddingBottom: 10,
-        //         margin: 20,
-        //         boxShadow:`0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)`
-        //     },
-        //     row: {
-        //         marginLeft: 0,
-        //         marginRight: 0
-        //     },
-        //     colMd6: {
-        //         minHeight: 1,
-        //         paddingRight: 15,
-        //         paddingLeft: 15
-        //     },
-        //     span: {
-        //         marginRight: 10
-        //     },
-        //     notFoundText: {
-        //         display: `block`,
-        //         textAlign: `center`,
-        //         margin: 20
-        //     }
-        //
-        // };
-
+        this.state = { detailedTrialMatches: this.buildDetaildTrialMatches(props.trialMatches, props.trials)};
     }
 
     shouldComponentUpdate(nextProps: IMatchMinerProps){
         return nextProps === this.props;
     }
 
-    // handleSelection(){
-    //     this.setState({ pdfUrl:this.buildPDFUrl(this.pdfSelectList.options[this.pdfSelectList.selectedIndex].value) });
-    // }
+    buildDetaildTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>) {
+
+        let groupedMatches = _.groupBy(matches, 'nctId');
+        let matchedTrials = [];
+        if (Array.isArray(groupedMatches)) {
+            console.log("is Array");
+        } else {
+            const key = Object.keys(groupedMatches)[0];
+            let matchedTrial:any = {};
+            _.some(trials, function(trial) {
+                if (key === trial['nctId']) {
+                    matchedTrial = trial;
+                    return true;
+                }
+            });
+            matchedTrial['matches'] = groupedMatches[key];
+            matchedTrials.push(matchedTrial);
+
+        }
+        return matchedTrials;
+    }
 
     render(){
-
-        return (
-            <div style={{minHeight: 400}}>
-                <div>
-                    {this.props.trialMatches.map(function(d, idx){
-                        return (
-                            <div className="container" key={idx}>
-                                <div className="row">
-                                    <div className="col-md-12">
-                                        <a href="">{d.nctId}</a>
-                                        {/*- {d.shortTitle}*/}
+        const reports = this.state.detailedTrialMatches.map(function(trial: any){
+            return (
+                <div className={styles.container}>
+                    <table className="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Trial Genomic</th>
+                            <th>Patient Genomic</th>
+                            <th>Trial Info</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    {trial.matches.map(function(match: any) {
+                                        return (
+                                            <div className="row">
+                                                <div className="col-md-6">
+                                                    <span className={styles.genomicspan}>{match.genomicAlteration}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    )}
+                                </td>
+                                <td>
+                                    {trial.matches.map(function(match: any) {
+                                            return (
+                                                <div className="row">
+                                                    <div className="col-md-6">
+                                                        <If condition={match.trueHugoSymbol && match.trueProteinChange}>
+                                                            <span className={styles.genomicspan}>{match.trueHugoSymbol}  {match.trueProteinChange}</span>
+                                                        </If>
+                                                    </div>
+                                                </div>
+                                        )}
+                                    )}
+                                </td>
+                                <td>
+                                    <div className="row">
+                                        <div className="col-md-12">
+                                            <span className={styles.boldspan}>{trial.shortTitle}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                {/*<div className="row" style={styles.row}>*/}
-                                    {/*<div className="col-md-12">*/}
-                                        {/*<span style={styles.span}>Long Title:</span>*/}
-                                        {/*<span>{d.longTitle}</span>*/}
-                                    {/*</div>*/}
-                                {/*</div>*/}
-                                <div className="row">
-                                    <div className="col-md-3">
-                                        <span>Vital Status:</span>
-                                        <span>{d.vitalStatus}</span>
+                                    <div className="row">
+                                        <div className="col-md-12">
+                                            <span className={styles.boldspan}>NCT ID:</span>
+                                            <span>{trial.nctId}</span>
+                                        </div>
                                     </div>
-                                    <div className="col-md-3">
-                                        <span>Trial Accrual Status:</span>
-                                        <span>{d.trialAccrualStatus}</span>
+                                    <div className="row">
+                                        <div className="col-md-12">
+                                            <span className={styles.boldspan}>Status:</span>
+                                            <span>{trial.status}</span>
+                                        </div>
                                     </div>
-                                    <div className="col-md-3">
-                                        <span>Patient Genomic:</span>
-                                        <span>{d.trueHugoSymbol} - {d.trueProteinChange}</span>
-                                    </div>
-                                    <div className="col-md-3">
-                                        <span>Trial Genomic:</span>
-                                        <span>{d.genomicAlteration}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    })}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+            )});
+        return (
+            <div>
+                {reports}
             </div>
         );
     }
