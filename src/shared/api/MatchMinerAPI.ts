@@ -4,8 +4,9 @@ import { ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
 /**
  * Retrieves the trial matches for the query given, if they are in the MatchMiner API.
  */
+const awsUrl = 'http://ec2-100-26-147-224.compute-1.amazonaws.com:5555';
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
-    return request.post('http://ec2-34-201-2-208.compute-1.amazonaws.com:5555/api/query_trial_match')
+    return request.post(awsUrl + '/api/query_trial_match')
     .set('Content-Type', 'application/json')
     .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .send(query)
@@ -32,7 +33,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
  * Returns a promise that resolves with the variants for the parameters given.
  */
 export async function postMatchMinerTrial(query: object): Promise<Array<ITrial>> {
-    return request.post('http://ec2-34-201-2-208.compute-1.amazonaws.com:5555/api/query_trial/')
+    return request.post(awsUrl + '/api/query_trial/')
     .set('Content-Type', 'application/json')
     .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .send(query)
@@ -49,14 +50,13 @@ export async function postMatchMinerTrial(query: object): Promise<Array<ITrial>>
 }
 
 export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
-    return request.get('http://ec2-34-201-2-208.compute-1.amazonaws.com:5555/api/query_trial/'+ nctId)
-    .set('Content-Type', 'application/json')
+    return request.get(awsUrl + '/api/query_trial/'+ nctId)
     .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .then((res) => {
         let response = JSON.parse(res.text);
         return {
-            longTitle: response.long_title,
             nctId: response.nct_id,
+            longTitle: response.long_title,
             phase: response.phase,
             shortTitle: response.short_title,
             status: response.status
