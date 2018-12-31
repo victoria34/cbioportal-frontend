@@ -16,6 +16,6 @@ export interface ITrialMatch {
     sampleId: string;
     mrn: string;
     trueProteinChange: string | null;
-    vitalStatus: string;
+    vitalStatus: string | null;
     genomicAlteration: string;
 }
