@@ -4,18 +4,23 @@
    padding: 15px;
    height: auto;
 
-   ul {
+   .diseasesUl {
       padding-left: 16px;
    }
-   .boldSpan {
+   .criteriaButton {
+      color: #ffffff;
+      width: 120px;
       margin-right: 10px;
-      font-weight: bold;
    }
-   .genomicSpan{
-      color: #3786C2;
+   .fontItalic{
+      font-style: italic;
+      font-size: 14px;
    }
-   .genomicCol{
-      margin-bottom: 5px;
+   .greenButton{
+      background-color: #00C851;
+   }
+   .orangeButton{
+      background-color: #ffbb33;
    }
    @media (min-width: 1200px) and (max-width: 2000px) {
       .thTitle {
