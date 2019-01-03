@@ -44,15 +44,15 @@ import {
     fetchCopyNumberSegments, fetchClinicalDataForPatient, makeStudyToCancerTypeMap,
     fetchCivicGenes, fetchCnaCivicGenes, fetchCivicVariants, groupBySampleId, findSamplesWithoutCancerTypeClinicalData,
     fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData,
-    getMatchMinerTrials
+    getMatchMinerTrials, getNctTrials
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";
 import {stringListToSet} from "../../../shared/lib/StringUtils";
 import {MutationTableDownloadDataFetcher} from "shared/lib/MutationTableDownloadDataFetcher";
 import { VariantAnnotation } from 'shared/api/generated/GenomeNexusAPI';
 import { fetchVariantAnnotationsIndexedByGenomicLocation } from 'shared/lib/MutationAnnotator';
-import { postMatchMinerTrial, postMatchMinerTrialMatches } from "../../../shared/api/MatchMinerAPI";
-import { ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
+import { postMatchMinerTrialMatches } from "../../../shared/api/MatchMinerAPI";
+import { INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
 
 type PageMode = 'patient' | 'sample';
 
@@ -587,16 +587,6 @@ export class PatientViewPageStore {
         }
     }, ONCOKB_DEFAULT);
 
-
-    // readonly trialMatch = remoteData<ITrialMatch[]>({
-    //     invoke: () => {
-    //         return postMatchMinerTrialMatches({mrn: this.patientId});
-    //     },
-    //     onError: (err: Error) => {
-    //         // fail silently
-    //     }
-    // }, []);
-
     readonly trialMatches = remoteData<Array<ITrialMatch>>({
         invoke: () => {
             return postMatchMinerTrialMatches({mrn: this.patientId});
@@ -606,18 +596,36 @@ export class PatientViewPageStore {
         }
     }, []);
 
-    readonly trials = remoteData<Array<ITrial>>({
-        await: () => [
-            this.trialMatches
-        ],
+    @computed get trialIds(): Array<string> {
+        if (this.trialMatches.result) {
+            let nctIds: Array<string> = [];
+            _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
+                nctIds.push(trialMatch.nctId);
+            });
+            nctIds = _.uniq(nctIds);
+            return nctIds;
+        } else {
+            return [];
+        }
+    }
+
+    readonly matchMinerTrials = remoteData<Array<ITrial>>({
         invoke: async () => {
-            if (this.trialMatches.result.length > 0) {
-                let nctIds: Array<string> = [];
-                _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
-                    nctIds.push(trialMatch.nctId);
-                });
-                nctIds = _.uniq(nctIds);
-                return await getMatchMinerTrials(nctIds);
+            if (this.trialIds) {
+                return await getMatchMinerTrials(this.trialIds);
+            } else {
+                return [];
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
+    readonly nctTrials = remoteData<Array<INctTrial>>({
+        invoke: async () => {
+            if (this.trialIds) {
+                return await getNctTrials(this.trialIds);
             } else {
                 return [];
             }

@@ -19,3 +19,9 @@ export interface ITrialMatch {
     vitalStatus: string | null;
     genomicAlteration: string;
 }
+
+export interface INctTrial{
+    nctId: string;
+    diseases: Array<string>;
+    interventions: Array<string>;
+}

@@ -183,7 +183,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
     }
     private shouldShowTrialMatch(patientViewPageStore: PatientViewPageStore): boolean {
         return patientViewPageStore.trialMatches.isComplete && patientViewPageStore.trialMatches.result.length > 0 &&
-            patientViewPageStore.trials.isComplete && patientViewPageStore.trials.result.length > 0;
+            patientViewPageStore.matchMinerTrials.isComplete && patientViewPageStore.nctTrials.isComplete;
     }
 
     hideTissueImageTab(){
@@ -511,7 +511,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
 
                     <MSKTab key={6} id="trialMatchTab" linkText="Trial Match"
                             hide={!this.shouldShowTrialMatch(patientViewPageStore)}>
-                        <MatchMiner trialMatches={patientViewPageStore.trialMatches.result} trials={patientViewPageStore.trials.result}/>
+                        <MatchMiner trialMatches={patientViewPageStore.trialMatches.result} trials={patientViewPageStore.matchMinerTrials.result} nctTrials={patientViewPageStore.nctTrials.result}/>
                     </MSKTab>
 
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
