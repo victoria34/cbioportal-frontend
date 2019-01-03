@@ -1,5 +1,4 @@
 export interface ITrial {
-    longTitle: string;
     nctId: string;
     phase: string;
     shortTitle: string;
@@ -20,20 +19,50 @@ export interface ITrialMatch {
     genomicAlteration: string;
 }
 
-export interface INctTrial{
+export interface INctTrial {
     nctId: string;
     diseases: Array<string>;
     interventions: Array<string>;
-    eligibility: any;
+    eligibility: {
+        structured: {
+            gender: string;
+            max_age: string;
+            max_age_number: number;
+            max_age_unit: string;
+            min_age: string;
+            min_age_number: number;
+            min_age_unit: string;
+            max_age_in_years: number;
+            min_age_in_years: number;
+        };
+        unstructured: Array<ICriteria>;
+    };
 }
 
-export interface IEligibility{
+export interface IEligibility {
     clinical: {
         age: string;
         sex: string;
     };
     genomic: {
-        inclusion: Array<any>;
-        exclusion: Array<any>;
+        inclusion: Array<ICriteria>;
+        exclusion: Array<ICriteria>;
     };
+}
+
+export interface ICriteria {
+    display_order: number;
+    inclusion_indicator: boolean;
+    description: string;
+}
+
+export interface IDiscreteTrialMatch {
+    nctId: string;
+    phase: string;
+    shortTitle: string;
+    status: string;
+    diseases: Array<string>;
+    interventions: Array<string>;
+    eligibility: IEligibility;
+    matches: Array<ITrialMatch>;
 }

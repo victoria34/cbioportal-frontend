@@ -2,8 +2,8 @@ import * as React from 'react';
 import { If, Then, Else } from 'react-if';
 import * as _ from 'lodash';
 import {observer} from "mobx-react";
-import { IEligibility, INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
-import styles from './style/MatchMiner.module.scss';
+import { IDiscreteTrialMatch, IEligibility, INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
+import styles from './style/trialMatch.module.scss';
 
 export type IMatchMinerProps = {
     trials: Array<ITrial>;
@@ -25,10 +25,10 @@ export default class MatchMiner extends React.Component<IMatchMinerProps, {detai
 
     buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>) {
         let groupedMatches = _.groupBy(matches, 'nctId');
-        let matchedTrials: Array<any> = [];
+        let matchedTrials: Array<IDiscreteTrialMatch> = [];
         const trialIds = Object.keys(groupedMatches);
         _.forEach(trialIds, function (key) {
-            let matchedTrial:any = {};
+            let matchedTrial: any = {};
             _.some(trials, function(trial) {
                 if (key === trial['nctId']) {
                     matchedTrial = trial;
@@ -80,6 +80,18 @@ export default class MatchMiner extends React.Component<IMatchMinerProps, {detai
         return matchedTrials;
     }
 
+    // displayCriteria(criteria: any) {
+    //     const results = criteria.map(function(cri: any){
+    //         return (
+    //             <li>{cri.description}</li>
+    //         )});
+    //     return (
+    //         <ul>
+    //             {results}
+    //         </ul>
+    //     );
+    // }
+
     render(){
         const reports = this.state.detailedTrialMatches.map(function(trial: any){
             return (
@@ -116,12 +128,14 @@ export default class MatchMiner extends React.Component<IMatchMinerProps, {detai
                             <br/>
                             <div>
                                 <If condition={trial.eligibility.genomic.inclusion.length > 0}>
-                                    <button className={"btn btn-xs " + styles.criteriaButton + " " + styles.orangeButton}>
+                                    <button className={"btn btn-xs " + styles.criteriaButton + " " + styles.orangeButton}
+                                            onClick={(e) => this.displayCriteria(trial.eligibility.genomic.inclusion)}>
                                         {trial.eligibility.genomic.inclusion.length} inclusion criteria
                                     </button>
                                 </If>
                                 <If condition={trial.eligibility.genomic.exclusion.length > 0}>
-                                    <button className={"btn btn-xs " + styles.criteriaButton + " " + styles.greenButton}>
+                                    <button className={"btn btn-xs " + styles.criteriaButton + " " + styles.greenButton}
+                                            onClick={(e) => this.displayCriteria(trial.eligibility.genomic.exclusion)}>
                                         {trial.eligibility.genomic.exclusion.length} exclusion criteria
                                     </button>
                                 </If>
