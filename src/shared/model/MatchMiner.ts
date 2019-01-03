@@ -24,4 +24,16 @@ export interface INctTrial{
     nctId: string;
     diseases: Array<string>;
     interventions: Array<string>;
+    eligibility: any;
+}
+
+export interface IEligibility{
+    clinical: {
+        age: string;
+        sex: string;
+    };
+    genomic: {
+        inclusion: Array<any>;
+        exclusion: Array<any>;
+    };
 }
