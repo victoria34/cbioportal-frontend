@@ -47,7 +47,8 @@ import {QueryParams} from "url";
 import {AppStore} from "../../AppStore";
 import request from 'superagent';
 import {remoteData} from "../../shared/api/remoteData";
-import MatchMiner from "./matchMiner/MatchMiner";
+import MatchMiner from "./trialMatch/MatchMiner";
+import TrialMatchTable from "./trialMatch/TrialMatchTable";
 
 const patientViewPageStore = new PatientViewPageStore();
 
@@ -547,7 +548,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
 
                     <MSKTab key={7} id="trialMatchTab" linkText="Trial Match"
                             hide={!this.shouldShowTrialMatch(patientViewPageStore)}>
-                        <MatchMiner trialMatches={patientViewPageStore.trialMatches.result} trials={patientViewPageStore.matchMinerTrials.result} nctTrials={patientViewPageStore.nctTrials.result}/>
+                        <TrialMatchTable trialMatches={patientViewPageStore.trialMatches.result} trials={patientViewPageStore.matchMinerTrials.result} nctTrials={patientViewPageStore.nctTrials.result} containerWidth={WindowStore.size.width-60}/>
                     </MSKTab>
 
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
