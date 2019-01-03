@@ -37,7 +37,6 @@ export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
         let response = JSON.parse(res.text);
         return {
             nctId: response.nct_id,
-            longTitle: response.long_title,
             phase: response.phase,
             shortTitle: response.short_title,
             status: response.status
