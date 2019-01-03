@@ -41,8 +41,8 @@ import GenomeNexusAPI from "shared/api/generated/GenomeNexusAPI";
 import {AlterationTypeConstants} from "../../pages/resultsView/ResultsViewPageStore";
 import {stringListToIndexSet} from "./StringUtils";
 import {GeneticTrackDatum_Data} from "../components/oncoprint/Oncoprint";
-import { getMatchMinerTrial } from "../api/MatchMinerAPI";
-import { ITrial } from "../model/MatchMiner";
+import { getMatchMinerTrial, getNctTrial } from "../api/MatchMinerAPI";
+import { INctTrial, ITrial } from "../model/MatchMiner";
 
 export const ONCOKB_DEFAULT: IOncoKbData = {
     uniqueSampleKeyToTumorType : {},
@@ -979,5 +979,11 @@ export async function getHierarchyData(
 export async function getMatchMinerTrials(nctIds: Array<string>) {
     const dataPromises = nctIds.map(nctId => getMatchMinerTrial(nctId));
     const results:Array<ITrial> = await Promise.all(dataPromises);
+    return results;
+}
+
+export async function getNctTrials(nctIds: Array<string>) {
+    const dataPromises = nctIds.map(nctId => getNctTrial(nctId));
+    const results:Array<INctTrial> = await Promise.all(dataPromises);
     return results;
 }

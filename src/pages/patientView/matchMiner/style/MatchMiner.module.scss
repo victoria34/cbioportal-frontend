@@ -4,6 +4,9 @@
    padding: 15px;
    height: auto;
 
+   ul {
+      padding-left: 16px;
+   }
    .boldSpan {
       margin-right: 10px;
       font-weight: bold;
@@ -13,6 +16,16 @@
    }
    .genomicCol{
       margin-bottom: 5px;
+   }
+   @media (min-width: 1200px) and (max-width: 2000px) {
+      .thTitle {
+         width: 300px;
+      }
+   }
+   @media (min-width: 2000px) {
+      .thTitle {
+         width: 800px;
+      }
    }
 }
 
