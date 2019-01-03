@@ -5,7 +5,7 @@ import { INctTrial, ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
 /**
  * Retrieves the trial matches for the query given, if they are in the MatchMiner API.
  */
-const awsUrl = 'http://ec2-18-205-1-208.compute-1.amazonaws.com:5555';
+const awsUrl = 'http://ec2-3-80-162-201.compute-1.amazonaws.com:5555';
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
     return request.post(awsUrl + '/api/query_trial_match')
     .set('Content-Type', 'application/json')
@@ -52,21 +52,24 @@ export async function getNctTrial(nctId: string): Promise<INctTrial> {
         let diseases: Array<string> = [];
         let interventions: Array<string> = [];
         _.forEach(response.diseases, function(disease) {
-            diseases.push(disease.display_name);
+            if (disease.inclusion_indicator === 'TRIAL') {
+                diseases.push( disease.display_name );
+            }
         });
         _.forEach(response.arms, function(arm) {
             if (arm.interventions) {
                 _.forEach(arm.interventions, function(intervention) {
-                    if (intervention.intervention_type === 'Drug') {
-                        interventions.push(intervention.intervention_name);
+                    if (intervention.inclusion_indicator === 'TRIAL') {
+                        interventions.push(intervention.intervention_type + ': ' + intervention.intervention_name);
                     }
                 });
             }
         });
         return {
             nctId: response.nct_id,
-            diseases: diseases,
-            interventions: interventions
+            diseases: _.uniq(diseases).sort(),
+            interventions: _.uniq(interventions).sort(),
+            eligibility: response.eligibility
         };
     });
 }
