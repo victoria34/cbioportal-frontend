@@ -41,7 +41,8 @@ import {
     fetchMutSigData, findMrnaRankMolecularProfileId, mergeDiscreteCNAData, fetchSamplesForPatient, fetchClinicalData,
     fetchCopyNumberSegments, fetchClinicalDataForPatient, makeStudyToCancerTypeMap,
     fetchCivicGenes, fetchCnaCivicGenes, fetchCivicVariants, groupBySampleId, findSamplesWithoutCancerTypeClinicalData,
-    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData
+    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData,
+    getMatchMinerTrials, getNctTrials
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";
 import {stringListToSet} from "../../../shared/lib/StringUtils";
@@ -51,6 +52,8 @@ import { fetchVariantAnnotationsIndexedByGenomicLocation } from 'shared/lib/Muta
 import { ClinicalAttribute } from 'shared/api/generated/CBioPortalAPI';
 import getBrowserWindow from "../../../shared/lib/getBrowserWindow";
 import {getNavCaseIdsCache} from "../../../shared/lib/handleLongUrls";
+import { postMatchMinerTrialMatches } from "../../../shared/api/MatchMinerAPI";
+import { INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
 
 type PageMode = 'patient' | 'sample';
 
@@ -632,6 +635,54 @@ export class PatientViewPageStore {
         }
     }, ONCOKB_DEFAULT);
 
+    readonly trialMatches = remoteData<Array<ITrialMatch>>({
+        invoke: () => {
+            return postMatchMinerTrialMatches({mrn: this.patientId});
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
+    @computed get trialIds(): Array<string> {
+        if (this.trialMatches.result) {
+            let nctIds: Array<string> = [];
+            _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
+                nctIds.push(trialMatch.nctId);
+            });
+            nctIds = _.uniq(nctIds);
+            return nctIds;
+        } else {
+            return [];
+        }
+    }
+
+    readonly matchMinerTrials = remoteData<Array<ITrial>>({
+        invoke: async () => {
+            if (this.trialIds) {
+                return await getMatchMinerTrials(this.trialIds);
+            } else {
+                return [];
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
+    readonly nctTrials = remoteData<Array<INctTrial>>({
+        invoke: async () => {
+            if (this.trialIds) {
+                return await getNctTrials(this.trialIds);
+            } else {
+                return [];
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
     readonly cnaCivicGenes = remoteData<ICivicGene | undefined>({
         await: () => [
             this.discreteCNAData,
@@ -663,36 +714,6 @@ export class PatientViewPageStore {
             this.discreteCNAData
         ],
         invoke: async() => fetchCopyNumberData(this.discreteCNAData, this.molecularProfileIdDiscrete)
-    }, []);
-
-    readonly trialMatches = remoteData<Array<ITrialMatch>>({
-        invoke: () => {
-            return postMatchMinerTrialMatches({mrn: this.patientId});
-        },
-        onError: (err: Error) => {
-            // fail silently
-        }
-    }, []);
-
-    readonly trials = remoteData<Array<ITrial>>({
-        await: () => [
-            this.trialMatches
-        ],
-        invoke: async () => {
-            if (this.trialMatches.result.length > 0) {
-                let nctIds: Array<string> = [];
-                _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
-                    nctIds.push(trialMatch.nctId);
-                });
-                nctIds = _.uniq(nctIds);
-                return await getMatchMinerTrials(nctIds);
-            } else {
-                return [];
-            }
-        },
-        onError: (err: Error) => {
-            // fail silently
-        }
     }, []);
 
     @computed get sampleIds(): string[]
