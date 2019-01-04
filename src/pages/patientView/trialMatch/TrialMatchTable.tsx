@@ -6,6 +6,7 @@ import { IDiscreteTrialMatch, IEligibility, INctTrial, ITrial, ITrialMatch } fro
 import styles from './style/trialMatch.module.scss';
 import { computed } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
+import ClickedButton from "./clickedButton";
 
 export type ITrialMatchProps = {
     trials: Array<ITrial>;
@@ -41,9 +42,9 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
     get columnsWidth() {
         return {
             [ColumnKey.NCTID]: 100,
-            [ColumnKey.TITLE]: this.props.containerWidth! - 1400,
-            [ColumnKey.DISEASES]: 300,
-            [ColumnKey.INTERVENTIONS]: 300,
+            [ColumnKey.TITLE]: this.props.containerWidth! - 1550,
+            [ColumnKey.DISEASES]: 400,
+            [ColumnKey.INTERVENTIONS]: 350,
             [ColumnKey.CRITERIA]: 300,
             [ColumnKey.GENOMICMATCH]: 300,
             [ColumnKey.STATUS]: 100
@@ -105,14 +106,22 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
                     <br/>
                     <div>
                         <If condition={trial.eligibility.genomic.inclusion.length > 0}>
-                            <button className={"btn btn-xs " + styles.criteriaButton + " " + styles.orangeButton}>
-                                {trial.eligibility.genomic.inclusion.length} inclusion criteria
-                            </button>
+                            <ClickedButton
+                                buttonName={trial.eligibility.genomic.inclusion.length + ' inclusion criteria'}
+                                className={"btn btn-xs " + styles.criteriaButton + " " + styles.orangeButton}
+                                listName="Inclusion Criteria"
+                                listContent={trial.eligibility.genomic.inclusion}
+                            >
+                            </ClickedButton>
                         </If>
                         <If condition={trial.eligibility.genomic.exclusion.length > 0}>
-                            <button className={"btn btn-xs " + styles.criteriaButton + " " + styles.greenButton}>
-                                {trial.eligibility.genomic.exclusion.length} exclusion criteria
-                            </button>
+                            <ClickedButton
+                                buttonName={trial.eligibility.genomic.exclusion.length + ' exclusion criteria'}
+                                className={"btn btn-xs " + styles.criteriaButton + " " + styles.greenButton}
+                                listName="Exclusion Criteria"
+                                listContent={trial.eligibility.genomic.exclusion}
+                            >
+                            </ClickedButton>
                         </If>
                     </div>
                 </div>
@@ -218,18 +227,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
             matchedTrials.push(matchedTrial);
         });
         return matchedTrials;
-    }
-
-    displayCriteria(criteria: any) {
-        const results = criteria.map(function(cri: any){
-            return (
-                <li>{cri.description}</li>
-            )});
-        return (
-            <ul>
-                {results}
-            </ul>
-        );
     }
 
     render() {
