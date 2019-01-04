@@ -15,6 +15,10 @@ export type ITrialMatchProps = {
     containerWidth: number;
 }
 
+export type ITrialMatchState = {
+    detailedTrialMatches: Array<IDiscreteTrialMatch>;
+}
+
 class TrialMatchTableComponent extends LazyMobXTable<IDiscreteTrialMatch> {
 
 }
@@ -30,7 +34,7 @@ enum ColumnKey {
 }
 
 @observer
-export default class TrialMatchTable extends React.Component<ITrialMatchProps, {}> {
+export default class TrialMatchTable extends React.Component<ITrialMatchProps, ITrialMatchState> {
 
     constructor(props: ITrialMatchProps) {
         super(props);
@@ -42,8 +46,8 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
     get columnsWidth() {
         return {
             [ColumnKey.NCTID]: 100,
-            [ColumnKey.TITLE]: this.props.containerWidth! - 1550,
-            [ColumnKey.DISEASES]: 400,
+            [ColumnKey.TITLE]: this.props.containerWidth! - 1500,
+            [ColumnKey.DISEASES]: 350,
             [ColumnKey.INTERVENTIONS]: 350,
             [ColumnKey.CRITERIA]: 300,
             [ColumnKey.GENOMICMATCH]: 300,
@@ -58,7 +62,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
                 <span><a href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></span>
             )
         },
-        width: this.columnsWidth[ColumnKey.NCTID],
+        width: this.columnsWidth[ColumnKey.NCTID]
     }, {
         name: ColumnKey.TITLE,
         render: (trial: IDiscreteTrialMatch) => {
@@ -66,7 +70,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
                 <span>{trial.shortTitle}</span>
             )
         },
-        width: this.columnsWidth[ColumnKey.TITLE]
+        // width: this.columnsWidth[ColumnKey.TITLE]
     }, {
         name: ColumnKey.DISEASES,
         render: (trial: IDiscreteTrialMatch) => {
@@ -127,7 +131,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, {
                 </div>
             )
         },
-        width: this.columnsWidth[ColumnKey.CRITERIA]
+        // width: this.columnsWidth[ColumnKey.CRITERIA]
     }, {
         name: ColumnKey.GENOMICMATCH,
         render: (trial: IDiscreteTrialMatch) => {

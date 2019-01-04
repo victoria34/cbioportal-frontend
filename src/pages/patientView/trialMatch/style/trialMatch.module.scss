@@ -2,7 +2,7 @@
    padding-left: 16px;
 }
 .buttonDiv {
-   display: unset;
+   display: table-cell;
 
    .criteriaButton {
       color: #ffffff;
@@ -19,15 +19,5 @@
 }
 .orangeButton{
    background-color: #ffbb33;
-}
-@media (min-width: 1200px) and (max-width: 2000px) {
-   .thTitle {
-      width: 300px;
-   }
-}
-@media (min-width: 2000px) {
-   .thTitle {
-      width: 800px;
-   }
 }
 
