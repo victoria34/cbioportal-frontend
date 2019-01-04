@@ -5,7 +5,7 @@ import { INctTrial, ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
 /**
  * Retrieves the trial matches for the query given, if they are in the MatchMiner API.
  */
-const awsUrl = 'http://ec2-3-80-162-201.compute-1.amazonaws.com:5555';
+const awsUrl = 'http://ec2-52-23-243-132.compute-1.amazonaws.com:5555';
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
     return request.post(awsUrl + '/api/query_trial_match')
     .set('Content-Type', 'application/json')
