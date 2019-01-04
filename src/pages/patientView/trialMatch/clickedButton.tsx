@@ -10,7 +10,11 @@ export interface IClickedButtonProps {
     listContent: Array<ICriteria>;
 }
 
-export default class ClickedButton extends React.Component<IClickedButtonProps, {}> {
+export interface IClickedButtonState {
+    clicked: boolean;
+};
+
+export default class ClickedButton extends React.Component<IClickedButtonProps, IClickedButtonState> {
 
     constructor(props: IClickedButtonProps) {
         super(props);
