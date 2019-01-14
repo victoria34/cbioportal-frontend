@@ -19,18 +19,43 @@ export type ITrialMatchState = {
     detailedTrialMatches: Array<IDiscreteTrialMatch>;
 }
 
-class TrialMatchTableComponent extends LazyMobXTable<IDiscreteTrialMatch> {
-
-}
-
 enum ColumnKey {
+    PROTOCOLNO = 'Protocol No',
     NCTID = 'NCT ID',
     TITLE = 'Title',
     DISEASES = 'Diseases',
     INTERVENTIONS = 'Interventions',
     CRITERIA = 'Criteria',
+    CLINICALMATCH = 'Clinical Match',
     GENOMICMATCH = 'Genomic Match',
     STATUS = 'Status'
+}
+
+function findClinicalNode(match: any, result: any) {
+    //Find all clinical nodes under 'match' object
+    if (match['clinical']) {
+        if (match['clinical']['oncotree_primary_diagnosis']) {
+            result.diseases.push(match['clinical']['oncotree_primary_diagnosis']);
+        }
+        if (match['clinical']['age_numerical']) {
+            result.age.push(match['clinical']['age_numerical']);
+        }
+        if (match['clinical']['gender']) {
+            result.gender.push(match['clinical']['gender']);
+        }
+    } else if (match['and']) {
+        _.forEach(match['and'], function(andNode) {
+            findClinicalNode(andNode, result);
+        });
+    } else if (match['or']) {
+        _.forEach(match['or'], function(orNode) {
+            findClinicalNode(orNode, result);
+        });
+    }
+}
+
+class TrialMatchTableComponent extends LazyMobXTable<IDiscreteTrialMatch> {
+
 }
 
 @observer
@@ -45,21 +70,31 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
     @computed
     get columnsWidth() {
         return {
-            [ColumnKey.NCTID]: 100,
+            [ColumnKey.PROTOCOLNO]: 100,
+            [ColumnKey.NCTID]: 150,
             [ColumnKey.TITLE]: this.props.containerWidth! - 1500,
-            [ColumnKey.DISEASES]: 350,
+            [ColumnKey.DISEASES]: 300,
             [ColumnKey.INTERVENTIONS]: 350,
-            [ColumnKey.CRITERIA]: 300,
+            // [ColumnKey.CRITERIA]: 300,
+            [ColumnKey.CLINICALMATCH]: 200,
             [ColumnKey.GENOMICMATCH]: 300,
             [ColumnKey.STATUS]: 100
         };
     }
 
     private _columns = [{
+        name: ColumnKey.PROTOCOLNO,
+        render: (trial: IDiscreteTrialMatch) => {
+            return (
+                <span><a target="_blank" href={"https://www.mskcc.org/cancer-care/clinical-trials/" + trial.protocolNo}>{trial.protocolNo}</a></span>
+            )
+        },
+        width: this.columnsWidth[ColumnKey.PROTOCOLNO]
+    }, {
         name: ColumnKey.NCTID,
         render: (trial: IDiscreteTrialMatch) => {
             return (
-                <span><a href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></span>
+                <span><a target="_blank" href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></span>
             )
         },
         width: this.columnsWidth[ColumnKey.NCTID]
@@ -72,66 +107,34 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         },
         // width: this.columnsWidth[ColumnKey.TITLE]
     }, {
-        name: ColumnKey.DISEASES,
+        name: ColumnKey.STATUS,
         render: (trial: IDiscreteTrialMatch) => {
             return (
-                <ul className={styles.diseasesUl}>
-                    {trial.diseases.map(function(disease: any) {
-                        return (
-                            <li>{disease}</li>
-                        )}
-                    )}
-                </ul>
+                <span>{trial.status}</span>
             )
         },
-        width: this.columnsWidth[ColumnKey.DISEASES]
+        width: this.columnsWidth[ColumnKey.STATUS]
     }, {
-        name: ColumnKey.INTERVENTIONS,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
-                <ul className={styles.diseasesUl}>
-                    {trial.interventions.map(function(intervention: any) {
-                        return (
-                            <li>{intervention}</li>
-                        )}
-                    )}
-                </ul>
-            )
-        },
-        width: this.columnsWidth[ColumnKey.INTERVENTIONS]
-    }, {
-        name: ColumnKey.CRITERIA,
+        name: ColumnKey.CLINICALMATCH,
         render: (trial: IDiscreteTrialMatch) => {
             return (
                 <div>
-                    <span>Age:&nbsp;</span><span>{trial.eligibility.clinical.age}</span>
-                    <br/>
-                    <span>Sex:&nbsp;</span><span>{trial.eligibility.clinical.sex}</span>
-                    <br/>
-                    <div>
-                        <If condition={trial.eligibility.genomic.inclusion.length > 0}>
-                            <ClickedButton
-                                buttonName={trial.eligibility.genomic.inclusion.length + ' inclusion criteria'}
-                                className={"btn btn-xs " + styles.criteriaButton + " " + styles.orangeButton}
-                                listName="Inclusion Criteria"
-                                listContent={trial.eligibility.genomic.inclusion}
-                            >
-                            </ClickedButton>
-                        </If>
-                        <If condition={trial.eligibility.genomic.exclusion.length > 0}>
-                            <ClickedButton
-                                buttonName={trial.eligibility.genomic.exclusion.length + ' exclusion criteria'}
-                                className={"btn btn-xs " + styles.criteriaButton + " " + styles.greenButton}
-                                listName="Exclusion Criteria"
-                                listContent={trial.eligibility.genomic.exclusion}
-                            >
-                            </ClickedButton>
-                        </If>
-                    </div>
+                    <If condition={trial.age}>
+                        <Then>
+                            <span>Age:&nbsp;</span><span>{trial.age}</span>
+                            <br/>
+                        </Then>
+                    </If>
+                    <If condition={trial.gender}>
+                        <Then>
+                            <span>Gender:&nbsp;</span><span>{trial.gender}</span>
+                            <br/>
+                        </Then>
+                    </If>
                 </div>
             )
         },
-        // width: this.columnsWidth[ColumnKey.CRITERIA]
+        width: this.columnsWidth[ColumnKey.CLINICALMATCH]
     }, {
         name: ColumnKey.GENOMICMATCH,
         render: (trial: IDiscreteTrialMatch) => {
@@ -167,13 +170,66 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         },
         width: this.columnsWidth[ColumnKey.GENOMICMATCH]
     }, {
-        name: ColumnKey.STATUS,
+        name: ColumnKey.DISEASES,
         render: (trial: IDiscreteTrialMatch) => {
             return (
-                <span>{trial.status}</span>
+                <ul className={styles.diseasesUl}>
+                    {trial.diseases.map(function(disease: any) {
+                        return (
+                            <li>{disease}</li>
+                        )}
+                    )}
+                </ul>
             )
         },
-        width: this.columnsWidth[ColumnKey.STATUS]
+        width: this.columnsWidth[ColumnKey.DISEASES]
+    }, {
+        name: ColumnKey.INTERVENTIONS,
+        render: (trial: IDiscreteTrialMatch) => {
+            return (
+                <ul className={styles.diseasesUl}>
+                    {trial.interventions.map(function(intervention: any) {
+                        return (
+                            <li>{intervention}</li>
+                        )}
+                    )}
+                </ul>
+            )
+        },
+        width: this.columnsWidth[ColumnKey.INTERVENTIONS]
+    // }, {
+    //     name: ColumnKey.CRITERIA,
+    //     render: (trial: IDiscreteTrialMatch) => {
+    //         return (
+    //             <div>
+    //                 <span>Age:&nbsp;</span><span>{trial.eligibility.clinical.age}</span>
+    //                 <br/>
+    //                 <span>Sex:&nbsp;</span><span>{trial.eligibility.clinical.sex}</span>
+    //                 <br/>
+    //                 <div>
+    //                     <If condition={trial.eligibility.genomic.inclusion.length > 0}>
+    //                         <ClickedButton
+    //                             buttonName={trial.eligibility.genomic.inclusion.length + ' inclusion criteria'}
+    //                             className={"btn btn-xs " + styles.criteriaButton + " " + styles.orangeButton}
+    //                             listName="Inclusion Criteria"
+    //                             listContent={trial.eligibility.genomic.inclusion}
+    //                         >
+    //                         </ClickedButton>
+    //                     </If>
+    //                     <If condition={trial.eligibility.genomic.exclusion.length > 0}>
+    //                         <ClickedButton
+    //                             buttonName={trial.eligibility.genomic.exclusion.length + ' exclusion criteria'}
+    //                             className={"btn btn-xs " + styles.criteriaButton + " " + styles.greenButton}
+    //                             listName="Exclusion Criteria"
+    //                             listContent={trial.eligibility.genomic.exclusion}
+    //                         >
+    //                         </ClickedButton>
+    //                     </If>
+    //                 </div>
+    //             </div>
+    //         )
+    //     },
+        // width: this.columnsWidth[ColumnKey.CRITERIA]
     }];
 
     buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>) {
@@ -190,9 +246,34 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             });
             matchedTrial['matches'] = groupedMatches[key];
 
+            let clinicalInfo: any = {
+                diseases: [],
+                age: [],
+                gender: []
+            };
+            // Get all diseases(oncotree_primary_diagnoses)
+            _.forEach(matchedTrial['treatmentList']['step'], function(step){
+                if (step['arm']) {
+                    _.forEach(step['arm'], function(arm) {
+                        if (arm['match']) {
+                            _.forEach(arm['match'], function(match) {
+                                findClinicalNode(match, clinicalInfo);
+                            });
+                        }
+                    });
+                }
+                if (step['match']) {
+                    _.forEach(step['match'], function(match) {
+                        findClinicalNode(match, clinicalInfo);
+                    });
+                }
+            });
+            matchedTrial['diseases'] = _.uniq(clinicalInfo.diseases);
+            matchedTrial['age'] = _.uniq(clinicalInfo.age).join(', ');
+            matchedTrial['gender'] = _.uniq(clinicalInfo.gender).join(', ');
+
             _.some(nctTrials, function(trial) {
                 if (key === trial['nctId']) {
-                    matchedTrial['diseases'] = trial['diseases'];
                     matchedTrial['interventions'] = trial['interventions'];
                     let eligibility: IEligibility = {
                         clinical:{
