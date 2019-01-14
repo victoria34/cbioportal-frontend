@@ -549,7 +549,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                     </MSKTab>
                     )}
 
-                    <MSKTab key={6} id="trialMatchTab" linkText="Trial Match"
+                    <MSKTab key={7} id="trialMatchTab" linkText="Trial Match"
                             hide={!this.shouldShowTrialMatch(patientViewPageStore)}>
                         <TrialMatchTable trialMatches={patientViewPageStore.trialMatches.result} trials={patientViewPageStore.matchMinerTrials.result} nctTrials={patientViewPageStore.nctTrials.result} containerWidth={WindowStore.size.width-20}/>
                     </MSKTab>

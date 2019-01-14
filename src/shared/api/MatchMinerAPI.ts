@@ -37,9 +37,11 @@ export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
         let response = JSON.parse(res.text);
         return {
             nctId: response.nct_id,
+            protocolNo: response.protocol_no,
             phase: response.phase,
             shortTitle: response.short_title,
-            status: response.status
+            status: response.status,
+            treatmentList: response.treatment_list
         };
     });
 }
@@ -48,13 +50,7 @@ export async function getNctTrial(nctId: string): Promise<INctTrial> {
     return request.get('https://clinicaltrialsapi.cancer.gov/v1/clinical-trial/'+ nctId)
     .then((res) => {
         let response = JSON.parse(res.text);
-        let diseases: Array<string> = [];
         let interventions: Array<string> = [];
-        _.forEach(response.diseases, function(disease) {
-            if (disease.inclusion_indicator === 'TRIAL') {
-                diseases.push( disease.display_name );
-            }
-        });
         _.forEach(response.arms, function(arm) {
             if (arm.interventions) {
                 _.forEach(arm.interventions, function(intervention) {
@@ -66,7 +62,6 @@ export async function getNctTrial(nctId: string): Promise<INctTrial> {
         });
         return {
             nctId: response.nct_id,
-            diseases: _.uniq(diseases).sort(),
             interventions: _.uniq(interventions).sort(),
             eligibility: response.eligibility
         };
