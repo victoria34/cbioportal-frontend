@@ -47,7 +47,6 @@ import {QueryParams} from "url";
 import {AppStore} from "../../AppStore";
 import request from 'superagent';
 import {remoteData} from "../../shared/api/remoteData";
-import MatchMiner from "./trialMatch/MatchMiner";
 import TrialMatchTable from "./trialMatch/TrialMatchTable";
 
 const patientViewPageStore = new PatientViewPageStore();
