@@ -42,7 +42,6 @@ import {showCustomTab} from "../../shared/lib/customTabs";
 import {StudyLink} from "../../shared/components/StudyLink/StudyLink";
 import WindowStore from "shared/components/window/WindowStore";
 import {QueryParams} from "url";
-import MatchMiner from "./trialMatch/MatchMiner";
 import TrialMatchTable from "./trialMatch/TrialMatchTable";
 
 const patientViewPageStore = new PatientViewPageStore();

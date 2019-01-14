@@ -1,8 +1,10 @@
 export interface ITrial {
     nctId: string;
+    protocolNo: string | null;
     phase: string;
     shortTitle: string;
     status: string;
+    treatmentList: string;
 }
 
 export interface ITrialMatch {
@@ -21,7 +23,6 @@ export interface ITrialMatch {
 
 export interface INctTrial {
     nctId: string;
-    diseases: Array<string>;
     interventions: Array<string>;
     eligibility: {
         structured: {
@@ -58,9 +59,12 @@ export interface ICriteria {
 
 export interface IDiscreteTrialMatch {
     nctId: string;
+    protocolNo: string | null;
     phase: string;
     shortTitle: string;
     status: string;
+    age: string | null;
+    gender: string | null;
     diseases: Array<string>;
     interventions: Array<string>;
     eligibility: IEligibility;
