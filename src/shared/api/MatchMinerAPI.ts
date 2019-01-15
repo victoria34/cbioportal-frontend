@@ -1,19 +1,21 @@
 import * as request from 'superagent';
 import * as _ from 'lodash';
 import { INctTrial, ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
+import { getMatchEngineUrl } from "./urls";
 
 /**
  * Retrieves the trial matches for the query given, if they are in the MatchMiner API.
  */
-const awsUrl = 'http://ec2-52-23-243-132.compute-1.amazonaws.com:5555';
+
+// const awsUrl = 'http://ec2-52-23-243-132.compute-1.amazonaws.com:5555';
+
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
-    return request.post(awsUrl + '/api/query_trial_match')
+    return request.post(getMatchEngineUrl() + '/api/query_trial_match')
     .set('Content-Type', 'application/json')
     .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .send(query)
     .then((res) => {
         let response = JSON.parse(res.text);
-        console.log("result:", response);
         return response.map((record:any) => ({
             nctId: record.nct_id,
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
@@ -31,7 +33,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
 }
 
 export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
-    return request.get(awsUrl + '/api/query_trial/'+ nctId)
+    return request.get(getMatchEngineUrl() + '/api/query_trial/'+ nctId)
     .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .then((res) => {
         let response = JSON.parse(res.text);
@@ -62,8 +64,7 @@ export async function getNctTrial(nctId: string): Promise<INctTrial> {
         });
         return {
             nctId: response.nct_id,
-            interventions: _.uniq(interventions).sort(),
-            eligibility: response.eligibility
+            interventions: _.uniq(interventions).sort()
         };
     });
 }
