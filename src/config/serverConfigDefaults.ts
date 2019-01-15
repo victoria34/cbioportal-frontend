@@ -11,8 +11,6 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
     digital_slide_archive_iframe_url:"https://cancer.digitalslidearchive.org/index.html?patientId=",
     digital_slide_archive_meta_url:"https://api.digitalslidearchive.org/api/v1/tcga/image?caseName=",
 
-    matchminer_url: "http://ec2-18-215-184-26.compute-1.amazonaws.com:8001/",
-
     mdacc_heatmap_patient_url: "https://bioinformatics.mdanderson.org/participant2maps?participant=",
     mdacc_heatmap_study_meta_url: "https://bioinformatics.mdanderson.org/study2url?studyid=",
     mdacc_heatmap_study_url: "https:// bioinformatics.mdanderson.org/TCGA/NGCHMPortal/?",
@@ -22,6 +20,8 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
     oncoprint_oncokb_hotspots_default:undefined,
     oncoprint_hide_vus_default:false,
     oncokb_public_api_url:"oncokb.org/api/v1",
+
+    matchengine_url:"ec2-52-23-243-132.compute-1.amazonaws.com:5555",
 
     pubmed_url: "https://www.ncbi.nlm.nih.gov/pubmed/<%=pmid%>",
 

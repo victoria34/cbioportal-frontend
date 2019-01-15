@@ -24,31 +24,6 @@ export interface ITrialMatch {
 export interface INctTrial {
     nctId: string;
     interventions: Array<string>;
-    eligibility: {
-        structured: {
-            gender: string;
-            max_age: string;
-            max_age_number: number;
-            max_age_unit: string;
-            min_age: string;
-            min_age_number: number;
-            min_age_unit: string;
-            max_age_in_years: number;
-            min_age_in_years: number;
-        };
-        unstructured: Array<ICriteria>;
-    };
-}
-
-export interface IEligibility {
-    clinical: {
-        age: string;
-        sex: string;
-    };
-    genomic: {
-        inclusion: Array<ICriteria>;
-        exclusion: Array<ICriteria>;
-    };
 }
 
 export interface ICriteria {
@@ -67,6 +42,5 @@ export interface IDiscreteTrialMatch {
     gender: string | null;
     diseases: Array<string>;
     interventions: Array<string>;
-    eligibility: IEligibility;
     matches: Array<ITrialMatch>;
 }
