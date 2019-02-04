@@ -208,8 +208,3 @@ export function getDocsUrl(sourceUrl:string,docsBaseUrl?:string): string {
         return docsBaseUrl + "/" + sourceUrl;
     }
 }
-
-export function getMatchEngineUrl() {
-    let url = AppConfig.serverConfig.matchengine_url;
-    return getProxyUrlIfNecessary(url);
-}

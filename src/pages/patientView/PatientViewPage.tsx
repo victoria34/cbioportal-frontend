@@ -32,7 +32,8 @@ import {getMouseIcon} from "./SVGIcons";
 import "./patient.scss";
 import IFrameLoader from "../../shared/components/iframeLoader/IFrameLoader";
 import {
-    getDigitalSlideArchiveIFrameUrl, getSampleViewUrl
+    getDigitalSlideArchiveIFrameUrl,
+    getSampleViewUrl
 } from "../../shared/api/urls";
 import {PageLayout} from "../../shared/components/PageLayout/PageLayout";
 import Helmet from "react-helmet";

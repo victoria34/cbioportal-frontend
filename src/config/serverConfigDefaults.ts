@@ -21,8 +21,6 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
     oncoprint_hide_vus_default:false,
     oncokb_public_api_url:"oncokb.org/api/v1",
 
-    matchengine_url:"ec2-52-23-243-132.compute-1.amazonaws.com:5555",
-
     pubmed_url: "https://www.ncbi.nlm.nih.gov/pubmed/<%=pmid%>",
 
     isoformOverrideSource:"uniprot",
