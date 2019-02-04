@@ -1,17 +1,19 @@
 import * as request from 'superagent';
 import * as _ from 'lodash';
 import { INctTrial, ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
+import { buildCBioPortalAPIUrl } from "./urls";
 
 /**
  * Retrieves the trial matches for the query given, if they are in the MatchMiner API.
  */
 
-
+const cbioportalUrl = buildCBioPortalAPIUrl('api-legacy/proxy/matchminer/api');
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
-    return request.post('/proxy/matchminer/api/query_trial_match')
-    .send(query)
+    return request.post(cbioportalUrl + '/query_trial_match')
+    .set('Content-Type', 'text/plain')
+    .send(JSON.stringify(query))
     .then((res) => {
-        let response = JSON.parse(res.text);
+        let response = JSON.parse(JSON.parse(res.text));
         return response.map((record:any) => ({
             nctId: record.nct_id,
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
@@ -29,9 +31,9 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
 }
 
 export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
-    return request.get('/proxy/matchminer/api/query_trial/'+ nctId)
+    return request.get(cbioportalUrl + '/query_trial/'+ nctId)
     .then((res) => {
-        let response = JSON.parse(res.text);
+        let response = JSON.parse(JSON.parse(res.text));
         return {
             nctId: response.nct_id,
             protocolNo: response.protocol_no,
