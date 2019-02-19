@@ -21,6 +21,13 @@ export interface ITrialMatch {
     genomicAlteration: string;
 }
 
+export interface IDisplayMatch {
+    trueHugoSymbol: string | null;
+    trueProteinChange: string | null;
+    genomicAlteration: string;
+    sampleIds: Array<string>;
+}
+
 export interface INctTrial {
     nctId: string;
     interventions: Array<string>;
@@ -42,5 +49,5 @@ export interface IDiscreteTrialMatch {
     gender: string | null;
     diseases: Array<string>;
     interventions: Array<string>;
-    matches: Array<ITrialMatch>;
+    matches: Array<IDisplayMatch>;
 }

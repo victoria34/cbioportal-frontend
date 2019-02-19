@@ -2,12 +2,14 @@ import * as React from 'react';
 import { If, Then, Else } from 'react-if';
 import * as _ from 'lodash';
 import {observer} from "mobx-react";
-import { IDiscreteTrialMatch, INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
+import { IDiscreteTrialMatch, IDisplayMatch, INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
 import styles from './style/trialMatch.module.scss';
 import { computed } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
+import SampleManager from "../sampleManager";
 
 export type ITrialMatchProps = {
+    sampleManager?: SampleManager | null;
     trials: Array<ITrial>;
     trialMatches:Array<ITrialMatch>;
     nctTrials:Array<INctTrial>;
@@ -68,78 +70,73 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
     @computed
     get columnsWidth() {
         return {
-            [ColumnKey.PROTOCOLNO]: 100,
-            [ColumnKey.NCTID]: 100,
-            [ColumnKey.TITLE]: 300,
-            [ColumnKey.DISEASES]: 160,
-            [ColumnKey.INTERVENTIONS]: this.props.containerWidth - 1000,
-            [ColumnKey.CLINICALCRITERIA]: 130,
-            [ColumnKey.GENOMICCRITERIA]: 150,
-            [ColumnKey.STATUS]: 60
+            [ColumnKey.PROTOCOLNO]: 0.08 * this.props.containerWidth,
+            [ColumnKey.NCTID]: 0.08 * this.props.containerWidth,
+            [ColumnKey.TITLE]: 0.24 * this.props.containerWidth,
+            [ColumnKey.DISEASES]: 0.13 * this.props.containerWidth,
+            [ColumnKey.INTERVENTIONS]: 0.16 * this.props.containerWidth,
+            [ColumnKey.CLINICALCRITERIA]: 0.1 * this.props.containerWidth,
+            [ColumnKey.GENOMICCRITERIA]: 0.16 * this.props.containerWidth,
+            [ColumnKey.STATUS]: 0.05 * this.props.containerWidth
         };
     }
 
     private _columns = [{
         name: ColumnKey.PROTOCOLNO,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <span><a target="_blank" href={"https://www.mskcc.org/cancer-care/clinical-trials/" + trial.protocolNo}>{trial.protocolNo}</a></span>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.PROTOCOLNO]
     }, {
         name: ColumnKey.NCTID,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <span><a target="_blank" href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></span>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.NCTID]
     }, {
         name: ColumnKey.TITLE,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <span>{trial.shortTitle}</span>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.TITLE]
     }, {
         name: ColumnKey.STATUS,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <span>{trial.status}</span>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.STATUS]
     }, {
         name: ColumnKey.GENOMICCRITERIA,
         render: (trial: IDiscreteTrialMatch) => {
+            const props = this.props;
             return (
                 <div>
-                    {trial.matches.map(function(match: any) {
-                        return (
-                            <div>
-                                <If condition={match.genomicAlteration.includes('!')}>
-                                    <Then>
-                                        <span><b>No </b>{match.genomicAlteration.replace(/!/g, '',)}</span>
-                                    </Then>
-                                    <Else>
-                                        <span>{match.genomicAlteration}</span>
-                                    </Else>
-                                </If>
-                                <br/>
-                            </div>
-                        )}
-                    )}
-                    <span className={styles.fontItalic}>(Matched to patient with&nbsp;
-                        {trial.matches.map(function(match: any) {
-                            return (
-                                <If condition={match.trueHugoSymbol || match.trueProteinChange}>
-                                    <span>{match.trueHugoSymbol + ' ' + match.trueProteinChange}</span>
-                                    <br/>
-                                </If>
-                            )}
-                        )})
+                    {trial.matches.map((match: any) => (
+                        <div>
+                            <If condition={match.genomicAlteration.includes('!')}>
+                                <Then>
+                                    <span><b>Not </b>{match.genomicAlteration.replace(/!/g, '',)}</span>
+                                </Then>
+                                <Else>
+                                    <span>{match.genomicAlteration}</span>
+                                </Else>
+                            </If>
+                            <br/>
+                        </div>
+                    ))}
+                    <span className={styles.fontItalic}>Matching Alteration(s):<br/>
+                        {trial.matches.map((match: any) => (
+                            <If condition={match.trueHugoSymbol || match.trueProteinChange}>
+                                <div>
+                                    <span className={styles.genomicSpan}>{match.trueHugoSymbol + ' ' + match.trueProteinChange}</span>
+                                    {match.sampleIds.map((sampleId: string) => (
+                                        <span className={styles.genomicSpan}>
+                                            { props.sampleManager!.getComponentForSample(sampleId, 1, '') }
+                                        </span>
+                                    ))}
+                                </div>
+                            </If>
+                        ))}
                     </span>
                 </div>
             )
@@ -147,8 +144,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         width: this.columnsWidth[ColumnKey.GENOMICCRITERIA]
     }, {
         name: ColumnKey.CLINICALCRITERIA,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <div>
                     <If condition={trial.age}>
                         <Then>
@@ -163,41 +159,32 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         </Then>
                     </If>
                 </div>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.CLINICALCRITERIA]
     }, {
         name: ColumnKey.DISEASES,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <ul className={styles.diseasesUl}>
-                    {trial.diseases.map(function(disease: any) {
-                        return (
+                    {trial.diseases.map((disease: any) => (
                             <li>{disease}</li>
-                        )}
-                    )}
+                    ))}
                 </ul>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.DISEASES]
     }, {
         name: ColumnKey.INTERVENTIONS,
-        render: (trial: IDiscreteTrialMatch) => {
-            return (
+        render: (trial: IDiscreteTrialMatch) => (
                 <ul className={styles.diseasesUl}>
-                    {trial.interventions.map(function(intervention: any) {
-                        return (
-                            <li>{intervention}</li>
-                        )}
-                    )}
+                    {trial.interventions.map((intervention: any) => (
+                        <li>{intervention}</li>
+                    ))}
                 </ul>
-            )
-        },
+        ),
         width: this.columnsWidth[ColumnKey.INTERVENTIONS]
     }];
 
     buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>) {
-        let groupedMatches = _.groupBy(matches, 'nctId');
+        const groupedMatches = _.groupBy(matches, 'nctId');
         let matchedTrials: Array<IDiscreteTrialMatch> = [];
         const trialIds = Object.keys(groupedMatches);
         _.forEach(trialIds, function (key) {
@@ -208,7 +195,27 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     return true;
                 }
             });
-            matchedTrial['matches'] = groupedMatches[key];
+
+            const groupByGenomicAlteration = _.groupBy(groupedMatches[key], 'genomicAlteration');
+            const gaKeys = Object.keys(groupByGenomicAlteration).sort();
+            let displayMatches: Array<IDisplayMatch> = [];
+            _.forEach(gaKeys, function(gaKey) {
+                let displayMatch: IDisplayMatch = {
+                    trueHugoSymbol: '',
+                    trueProteinChange: '',
+                    genomicAlteration: '',
+                    sampleIds: []
+                };
+                displayMatch.genomicAlteration = gaKey;
+                displayMatch.trueHugoSymbol = groupByGenomicAlteration[gaKey][0].trueHugoSymbol;
+                displayMatch.trueProteinChange = groupByGenomicAlteration[gaKey][0].trueProteinChange;
+                const sampleIds = _.map(groupByGenomicAlteration[gaKey], 'sampleId');
+                displayMatch.sampleIds = sampleIds.sort();
+                displayMatches.push(displayMatch);
+            });
+
+
+            matchedTrial['matches'] = displayMatches;
 
             let clinicalInfo: any = {
                 diseases: [],
