@@ -2,23 +2,10 @@
    padding-left: 0;
    list-style-type: none;
 }
-.buttonDiv {
-   display: table-cell;
-
-   .criteriaButton {
-      color: #ffffff;
-      width: 120px;
-      margin-right: 10px;
-   }
-}
 .fontItalic{
-   font-style: italic;
    font-size: 14px;
 }
-.greenButton{
-   background-color: #00C851;
-}
-.orangeButton{
-   background-color: #ffbb33;
+.genomicSpan {
+   margin-right:5px;
 }
 
