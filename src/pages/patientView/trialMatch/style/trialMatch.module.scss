@@ -1,11 +1,36 @@
+.criteriaHr {
+  margin:3px 0 3px 0 !important;
+}
 .diseasesUl {
-   padding-left: 0;
-   list-style-type: none;
+   padding-left: 15px;
+   //list-style-type: none;
 }
 .fontItalic{
    font-size: 14px;
 }
 .genomicSpan {
    margin-right:5px;
+}
+.criteriaContainer {
+  display: flex;
+  justify-content: space-between;
+  //align-items: center;
+
+  .firstLeft {
+    flex: 1 1 auto;
+  }
+  .firstRight{
+    display:flex;
+    flex: 0 0 auto;
+    width: 230px;
+
+    .secondLeft {
+      flex: 0 0 auto;
+      width: 50px;
+    }
+    .secondRight{
+      flex: 1 1 auto;
+    }
+  }
 }
 
