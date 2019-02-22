@@ -10,6 +10,7 @@ export interface ITrial {
 export interface ITrialMatch {
     nctId: string;
     oncotreePrimaryDiagnosisName: string;
+    gender: string | null;
     matchType: string;
     trueHugoSymbol: string | null;
     trialAccrualStatus: string;
@@ -19,12 +20,16 @@ export interface ITrialMatch {
     trueProteinChange: string | null;
     vitalStatus: string | null;
     genomicAlteration: string;
+    trialAgeNumerical: string | null;
+    trialOncotreePrimaryDiagnosis: string| null;
 }
 
 export interface IDisplayMatch {
     trueHugoSymbol: string | null;
     trueProteinChange: string | null;
     genomicAlteration: string;
+    trialAgeNumerical: string | null;
+    trialOncotreePrimaryDiagnosis: string| null;
     sampleIds: Array<string>;
 }
 
@@ -33,21 +38,12 @@ export interface INctTrial {
     interventions: Array<string>;
 }
 
-export interface ICriteria {
-    display_order: number;
-    inclusion_indicator: boolean;
-    description: string;
-}
-
 export interface IDiscreteTrialMatch {
     nctId: string;
     protocolNo: string | null;
     phase: string;
     shortTitle: string;
     status: string;
-    age: string | null;
-    gender: string | null;
-    diseases: Array<string>;
     interventions: Array<string>;
     matches: Array<IDisplayMatch>;
 }
