@@ -17,6 +17,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
         return response.map((record:any) => ({
             nctId: record.nct_id,
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
+            gender: record.gender,
             matchType: record.match_type,
             trueHugoSymbol: record.true_hugo_symbol,
             trialAccrualStatus: record.trial_accrual_status,
@@ -25,7 +26,9 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
             mrn: record.mrn,
             trueProteinChange: record.true_protein_change,
             vitalStatus: record.vital_status,
-            genomicAlteration: record.genomic_alteration
+            genomicAlteration: record.genomic_alteration,
+            trialAgeNumerical: record.trial_age_numerical,
+            trialOncotreePrimaryDiagnosis: record.trial_oncotree_primary_diagnosis
         }));
     });
 }
@@ -53,8 +56,8 @@ export async function getNctTrial(nctId: string): Promise<INctTrial> {
         _.forEach(response.arms, function(arm) {
             if (arm.interventions) {
                 _.forEach(arm.interventions, function(intervention) {
-                    if (intervention.inclusion_indicator === 'TRIAL') {
-                        interventions.push(intervention.intervention_type + ': ' + intervention.intervention_name);
+                    if (intervention.inclusion_indicator === 'TRIAL' && intervention.intervention_type === 'Drug') {
+                        interventions.push(intervention.intervention_name);
                     }
                 });
             }
