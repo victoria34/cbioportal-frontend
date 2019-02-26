@@ -39,7 +39,11 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
 
     constructor(props: ITrialMatchProps) {
         super(props);
-        this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials, props.sampleManager) };
+        if (props.sampleManager) {
+            this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials, props.sampleManager) };
+        } else {
+            this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials) };
+        }
     }
 
     @computed
@@ -72,7 +76,8 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         name: ColumnKey.MATCHINGCRITERIA,
         render: (trial: IDiscreteTrialMatch) => {
             const props = this.props;
-            return trial.matches.map((clinicalMatch: any) => (
+            return <div> {
+                trial.matches.map((clinicalMatch: any) => (
                 <div className={styles.criteriaContainer}>
                     <span className={styles.genomicSpan + styles.firstLeft}>
                         {clinicalMatch.matches.map((genomicMatch: any, index:number) => (
@@ -87,7 +92,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                             ))}
                                         </span>
                                     </div>
-                                    {/*<If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>*/}
                                 </Then>
                                 <Else>
                                     <div>
@@ -101,7 +105,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                             {')'}
                                         </span>
                                     </div>
-                                    {/*<If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>*/}
                                 </Else>
                             </If>
                         ))}
@@ -111,8 +114,8 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         <span className={styles.secondRight}>{clinicalMatch.trialOncotreePrimaryDiagnosis}</span>
                     </span>
                 </div>
-
-            ));
+            ))
+            }</div>
         },
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
     }, {
