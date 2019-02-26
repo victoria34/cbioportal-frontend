@@ -39,7 +39,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
 
     constructor(props: ITrialMatchProps) {
         super(props);
-        this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials) };
+        this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials, props.sampleManager) };
     }
 
     @computed
@@ -87,7 +87,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                             ))}
                                         </span>
                                     </div>
-                                    <If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                                    {/*<If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>*/}
                                 </Then>
                                 <Else>
                                     <div>
@@ -101,7 +101,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                             {')'}
                                         </span>
                                     </div>
-                                    <If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                                    {/*<If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>*/}
                                 </Else>
                             </If>
                         ))}
@@ -127,7 +127,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         width: this.columnsWidth[ColumnKey.INTERVENTIONS]
     }];
 
-    buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>) {
+    buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>, sampleManager?: SampleManager) {
         const groupedMatches = _.groupBy(matches, 'nctId');
         let matchedTrials: Array<IDiscreteTrialMatch> = [];
         const trialIds = Object.keys(groupedMatches);
@@ -173,8 +173,15 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         genomicAlteration: gaKey,
                         sampleIds: []
                     };
-                    const sampleIds = _.map(groupByGenomicAlteration[gaKey], 'sampleId');
-                    displayMatch.sampleIds = _.uniq(sampleIds).sort();
+                    const sampleIds = _.uniq(_.map(groupByGenomicAlteration[gaKey], 'sampleId'));
+                    if (sampleManager) {
+                        displayMatch.sampleIds = sampleManager.samples.map((item:any)=>{
+                            if (sampleIds.includes(item.id)) return item.id;
+                        });
+                    } else {
+                        displayMatch.sampleIds = sampleIds;
+                    }
+
                     displayMatches.push(displayMatch);
                 });
 
