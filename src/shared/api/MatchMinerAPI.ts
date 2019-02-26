@@ -19,6 +19,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
             gender: record.gender,
             matchType: record.match_type,
+            armDescription: record.arm_description,
             trueHugoSymbol: record.true_hugo_symbol,
             trialAccrualStatus: record.trial_accrual_status,
             matchLevel: record.match_level,
@@ -27,7 +28,8 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
             trueProteinChange: record.true_protein_change,
             vitalStatus: record.vital_status,
             genomicAlteration: record.genomic_alteration,
-            clinicalInfo: record.trial_age_numerical + ' ' + record.trial_oncotree_primary_diagnosis,
+            patientClinical: record.trial_age_numerical + ' ' + record.trial_oncotree_primary_diagnosis,
+            patientGenomic: record.true_hugo_symbol + ' ' + record.true_protein_change,
             trialAgeNumerical: record.trial_age_numerical,
             trialOncotreePrimaryDiagnosis: record.trial_oncotree_primary_diagnosis
         }));
