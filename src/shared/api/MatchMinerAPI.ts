@@ -9,11 +9,12 @@ import { buildCBioPortalAPIUrl } from "./urls";
 
 const cbioportalUrl = buildCBioPortalAPIUrl('api-legacy/proxy/matchminer/api');
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
-    return request.post(cbioportalUrl + '/query_trial_match')
-    .set('Content-Type', 'text/plain')
+    return request.post('http://ec2-52-23-243-132.compute-1.amazonaws.com:5555/api/query_trial_match')
+    .set('Content-Type', 'application/json')
+        .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .send(JSON.stringify(query))
     .then((res) => {
-        let response = JSON.parse(JSON.parse(res.text));
+        let response = JSON.parse(res.text);
         return response.map((record:any) => ({
             nctId: record.nct_id,
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
@@ -27,6 +28,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
             trueProteinChange: record.true_protein_change,
             vitalStatus: record.vital_status,
             genomicAlteration: record.genomic_alteration,
+            clinicalInfo: record.trial_age_numerical + ' ' + record.trial_oncotree_primary_diagnosis,
             trialAgeNumerical: record.trial_age_numerical,
             trialOncotreePrimaryDiagnosis: record.trial_oncotree_primary_diagnosis
         }));
@@ -34,9 +36,10 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
 }
 
 export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
-    return request.get(cbioportalUrl + '/query_trial/'+ nctId)
+    return request.get('http://ec2-52-23-243-132.compute-1.amazonaws.com:5555/api/query_trial/'+ nctId)
+        .set('Authorization', 'Basic ZmI0ZDY4MzAtZDNhYS00ODFiLWJjZDYtMjcwZDY5NzkwZTExOg==')
     .then((res) => {
-        let response = JSON.parse(JSON.parse(res.text));
+        let response = JSON.parse(res.text);
         return {
             nctId: response.nct_id,
             protocolNo: response.protocol_no,

@@ -2,7 +2,10 @@ import * as React from 'react';
 import { If, Then, Else } from 'react-if';
 import * as _ from 'lodash';
 import {observer} from "mobx-react";
-import { IDiscreteTrialMatch, IDisplayMatch, INctTrial, ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
+import {
+    IClinicalGroupMatch, IDiscreteTrialMatch, IGenomicMatch, INctTrial, ITrial,
+    ITrialMatch
+} from "../../../shared/model/MatchMiner";
 import styles from './style/trialMatch.module.scss';
 import { computed } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
@@ -69,49 +72,47 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         name: ColumnKey.MATCHINGCRITERIA,
         render: (trial: IDiscreteTrialMatch) => {
             const props = this.props;
-            const lastIndex = trial.matches.length - 1;
-            return (
-                <div>
-                    {trial.matches.map((match: any, index:number) => (
-                            <If condition={match.genomicAlteration.includes('!')}>
+            return trial.matches.map((clinicalMatch: any) => (
+                <div className={styles.criteriaContainer}>
+                    <span className={styles.genomicSpan + styles.firstLeft}>
+                        {clinicalMatch.matches.map((genomicMatch: any, index:number) => (
+                            <If condition={genomicMatch.genomicAlteration.includes('!')}>
                                 <Then>
-                                    <div className={styles.criteriaContainer}>
-                                        <span className={styles.genomicSpan + styles.firstLeft}><b>Not </b>{match.genomicAlteration.replace(/!/g, '',) + ' '}
-                                            {match.sampleIds.map((sampleId: string) => (
+                                    <div>
+                                        <span className={styles.genomicSpan + styles.firstLeft}><b>Not </b>{genomicMatch.genomicAlteration.replace(/!/g, '',) + ' '}
+                                            {genomicMatch.sampleIds.map((sampleId: string) => (
                                                 <span className={styles.genomicSpan}>
                                                     {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
                                                 </span>
                                             ))}
                                         </span>
-                                        <span className={styles.firstRight}>
-                                             <span className={styles.secondLeft}>{match.trialAgeNumerical}</span>
-                                            <span className={styles.secondRight}>{match.trialOncotreePrimaryDiagnosis}</span>
-                                        </span>
                                     </div>
-                                    <If condition={index < lastIndex}><hr className={styles.criteriaHr}/></If>
+                                    <If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
                                 </Then>
                                 <Else>
-                                    <div className={styles.criteriaContainer}>
+                                    <div>
                                         <span className={styles.genomicSpan + styles.firstLeft}>
-                                            {match.genomicAlteration + ' ( ' + match.trueHugoSymbol + ' ' + match.trueProteinChange + ' '}
-                                            {match.sampleIds.map((sampleId: string) => (
+                                            {genomicMatch.genomicAlteration + ' ( ' + genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
+                                            {genomicMatch.sampleIds.map((sampleId: string) => (
                                                 <span className={styles.genomicSpan}>
                                                     {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
                                                 </span>
                                             ))}
                                             {')'}
                                         </span>
-                                        <span className={styles.firstRight}>
-                                             <span className={styles.secondLeft}>{match.trialAgeNumerical}</span>
-                                            <span className={styles.secondRight}>{match.trialOncotreePrimaryDiagnosis}</span>
-                                        </span>
                                     </div>
-                                    <If condition={index < lastIndex}><hr className={styles.criteriaHr}/></If>
+                                    <If condition={index < clinicalMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
                                 </Else>
                             </If>
-                    ))}
+                        ))}
+                    </span>
+                    <span className={styles.firstRight}>
+                         <span className={styles.secondLeft}>{clinicalMatch.trialAgeNumerical}</span>
+                        <span className={styles.secondRight}>{clinicalMatch.trialOncotreePrimaryDiagnosis}</span>
+                    </span>
                 </div>
-            )
+
+            ));
         },
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
     }, {
@@ -139,43 +140,50 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 }
             });
 
-            const groupByGenomicAlteration = _.groupBy(groupedMatches[key], 'genomicAlteration');
-            const gaKeys = Object.keys(groupByGenomicAlteration).sort((a,b) => {
-                if (a.includes('!')) {
-                    if (b.includes('!')) { // a and b contain '!'
-                        return a.length - b.length || a.slice(1).localeCompare(b.slice(1));
-                    } else { // only a contains '!'
-                        return 1;
-                    }
-                } else {
-                    if (b.includes('!')) { // only b contains '!'
-                        return -1;
-                    } else { // a and b don't contain '!'
-                        return a.length - b.length || a.localeCompare(b);
-                    }
-                }
-            });
-            let displayMatches: Array<IDisplayMatch> = [];
-            _.forEach(gaKeys, function(gaKey) {
-                let displayMatch: IDisplayMatch = {
-                    trueHugoSymbol: '',
-                    trueProteinChange: '',
-                    genomicAlteration: '',
-                    trialAgeNumerical: '',
-                    trialOncotreePrimaryDiagnosis: '',
-                    sampleIds: []
+            const groupByClinicalInfo = _.groupBy(groupedMatches[key], 'clinicalInfo');
+            const ciKeys = Object.keys(groupByClinicalInfo).sort();
+            let matches: Array<IClinicalGroupMatch> = [];
+            _.forEach(ciKeys, function(ciKey) {
+                let clinicalGroupMatch: IClinicalGroupMatch = {
+                    trialAgeNumerical: groupByClinicalInfo[ciKey][0].trialAgeNumerical,
+                    trialOncotreePrimaryDiagnosis: groupByClinicalInfo[ciKey][0].trialOncotreePrimaryDiagnosis,
+                    matches: []
                 };
+                const groupByGenomicAlteration = _.groupBy(groupByClinicalInfo[ciKey], 'genomicAlteration');
+                const gaKeys = Object.keys(groupByGenomicAlteration).sort((a,b) => {
+                    if (a.includes('!')) {
+                        if (b.includes('!')) { // a and b contain '!'
+                            return a.length - b.length || a.slice(1).localeCompare(b.slice(1));
+                        } else { // only a contains '!'
+                            return 1;
+                        }
+                    } else {
+                        if (b.includes('!')) { // only b contains '!'
+                            return -1;
+                        } else { // a and b don't contain '!'
+                            return a.length - b.length || a.localeCompare(b);
+                        }
+                    }
+                });
+                let displayMatches: Array<IGenomicMatch> = [];
+                _.forEach(gaKeys, function(gaKey) {
+                    let displayMatch: IGenomicMatch = {
+                        trueHugoSymbol: groupByGenomicAlteration[gaKey][0].trueHugoSymbol,
+                        trueProteinChange: groupByGenomicAlteration[gaKey][0].trueProteinChange,
+                        genomicAlteration: gaKey,
+                        sampleIds: []
+                    };
+                    const sampleIds = _.map(groupByGenomicAlteration[gaKey], 'sampleId');
+                    displayMatch.sampleIds = _.uniq(sampleIds).sort();
+                    displayMatches.push(displayMatch);
+                });
 
-                displayMatch.genomicAlteration = gaKey;
-                displayMatch.trueHugoSymbol = groupByGenomicAlteration[gaKey][0].trueHugoSymbol;
-                displayMatch.trueProteinChange = groupByGenomicAlteration[gaKey][0].trueProteinChange;
-                displayMatch.trialAgeNumerical = groupByGenomicAlteration[gaKey][0].trialAgeNumerical;
-                displayMatch.trialOncotreePrimaryDiagnosis = groupByGenomicAlteration[gaKey][0].trialOncotreePrimaryDiagnosis;
-                const sampleIds = _.map(groupByGenomicAlteration[gaKey], 'sampleId');
-                displayMatch.sampleIds = _.uniq(sampleIds).sort();
-                displayMatches.push(displayMatch);
+                clinicalGroupMatch.matches = displayMatches;
+                matches.push(clinicalGroupMatch);
             });
-            matchedTrial['matches'] = displayMatches;
+
+
+            matchedTrial['matches'] = matches;
 
             _.some(nctTrials, function(trial) {
                 if (key === trial['nctId']) {

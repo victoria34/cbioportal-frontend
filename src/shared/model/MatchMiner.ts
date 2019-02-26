@@ -20,17 +20,22 @@ export interface ITrialMatch {
     trueProteinChange: string | null;
     vitalStatus: string | null;
     genomicAlteration: string;
+    clinicalInfo: string | null;
     trialAgeNumerical: string | null;
     trialOncotreePrimaryDiagnosis: string| null;
 }
 
-export interface IDisplayMatch {
+export interface IGenomicMatch {
     trueHugoSymbol: string | null;
     trueProteinChange: string | null;
     genomicAlteration: string;
+    sampleIds: Array<string>;
+}
+
+export interface IClinicalGroupMatch {
     trialAgeNumerical: string | null;
     trialOncotreePrimaryDiagnosis: string| null;
-    sampleIds: Array<string>;
+    matches: Array<IGenomicMatch>;
 }
 
 export interface INctTrial {
@@ -45,5 +50,5 @@ export interface IDiscreteTrialMatch {
     shortTitle: string;
     status: string;
     interventions: Array<string>;
-    matches: Array<IDisplayMatch>;
+    matches: Array<IClinicalGroupMatch>;
 }
