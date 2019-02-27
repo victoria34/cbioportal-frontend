@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import {observer} from "mobx-react";
 import {
     IClinicalGroupMatch, IGenomicGroupMatch, IDiscreteTrialMatch, IGenomicMatch, INctTrial, ITrial,
-    ITrialMatch
+    ITrialMatch, IArmMatch
 } from "../../../shared/model/MatchMiner";
 import styles from './style/trialMatch.module.scss';
 import { computed } from "mobx";
@@ -80,68 +80,86 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         name: ColumnKey.MATCHINGCRITERIA,
         render: (trial: IDiscreteTrialMatch) => {
             const props = this.props;
-            return <div> {
-                trial.matches.map((clinicalGroupMatch: any) => (
-                    <span>
-                        {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
-                            <If condition={genomicGroupMatch.genomicAlteration.includes('!')}>
-                                <Then>
-                                    <div>
-                                        <span className={styles.genomicSpan}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '',) + ' '}
-                                            {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
-                                                <span className={styles.genomicSpan}>
-                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                </span>
-                                            ))}
-                                        </span>
-                                    </div>
-                                </Then>
-                                <Else>
-                                    <If condition={genomicGroupMatch.matches.length === 1 &&
-                                    genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
-                                        <Then>
-                                            <div>
-                                                <span>{genomicGroupMatch.genomicAlteration + ' '}
-                                                    {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
-                                                        <span className={styles.genomicSpan}>
-                                                            {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                        </span>
-                                                    ))}
-                                                </span>
-                                            </div>
-                                        </Then>
-                                        <Else>
-                                            <div>
-                                                <span className={styles.genomicSpan}>
-                                                    {genomicGroupMatch.genomicAlteration + ' ( '}
-                                                    {genomicGroupMatch.matches.map((genomicMatch: any) => (
-                                                        <span>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
-                                                            {genomicMatch.sampleIds.map((sampleId: string) => (
+            return <div>
+                {trial.matches.map((armMatch: any, index: number) => (
+                    <div>
+                        <div className={styles.criteriaContainer}>
+                            <If condition={armMatch.armDescription !== 'null'}>
+                                <span className={styles.left}>{armMatch.armDescription}</span>
+                            </If>
+                            <span className={styles.right}>
+                                {armMatch.matches.map((clinicalGroupMatch: any) => (
+                                    <span>
+                                        {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
+                                            <If condition={genomicGroupMatch.genomicAlteration.includes('!')}>
+                                                <Then>
+                                                    <div>
+                                                        <span className={styles.genomicSpan}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '',) + ' '}
+                                                            {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
                                                                 <span className={styles.genomicSpan}>
                                                                     {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
                                                                 </span>
                                                             ))}
                                                         </span>
-                                                    ))}
-                                                    {')'}
-                                                </span>
-                                            </div>
-                                        </Else>
-                                    </If>
-                                </Else>
-                            </If>
-                        ))}
-                    </span>
-            ))
-            }</div>
+                                                    </div>
+                                                </Then>
+                                                <Else>
+                                                    <If condition={genomicGroupMatch.matches.length === 1 &&
+                                                    genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
+                                                        <Then>
+                                                            <div>
+                                                                <span>{genomicGroupMatch.genomicAlteration + ' '}
+                                                                    {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                                        <span className={styles.genomicSpan}>
+                                                                            {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                        </span>
+                                                                    ))}
+                                                                </span>
+                                                            </div>
+                                                        </Then>
+                                                        <Else>
+                                                            <div>
+                                                                <span className={styles.genomicSpan}>
+                                                                    {genomicGroupMatch.genomicAlteration + ' ( '}
+                                                                    {genomicGroupMatch.matches.map((genomicMatch: any) => (
+                                                                        <span>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
+                                                                            {genomicMatch.sampleIds.map((sampleId: string) => (
+                                                                                <span className={styles.genomicSpan}>
+                                                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                                </span>
+                                                                            ))}
+                                                                        </span>
+                                                                    ))}
+                                                                    {')'}
+                                                                </span>
+                                                            </div>
+                                                        </Else>
+                                                    </If>
+                                                </Else>
+                                            </If>
+                                        ))}
+                                    </span>
+                                ))}
+                            </span>
+
+                        </div>
+                        <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                    </div>
+                ))}
+                </div>
         },
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
     }, {
         name: ColumnKey.AGE,
         render: (trial: IDiscreteTrialMatch) => (
                 <div>
-                    {trial.matches.map((clinicalGroupMatch: any) => (
-                        <span>{clinicalGroupMatch.trialAgeNumerical}</span>
+                    {trial.matches.map((armMatch: any, index: number) => (
+                        <div>
+                            {armMatch.matches.map((clinicalGroupMatch: any) => (
+                                <span>{clinicalGroupMatch.trialAgeNumerical}</span>
+                            ))}
+                            <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                        </div>
                     ))}
                 </div>
         ),
@@ -150,8 +168,13 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         name: ColumnKey.CANCERTYPE,
         render: (trial: IDiscreteTrialMatch) => (
             <div>
-                {trial.matches.map((clinicalGroupMatch: any) => (
-                    <span>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis}</span>
+                {trial.matches.map((armMatch: any, index: number) => (
+                    <div>
+                        {armMatch.matches.map((clinicalGroupMatch: any) => (
+                            <span>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis}</span>
+                        ))}
+                        <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                    </div>
                 ))}
             </div>
         ),
@@ -181,65 +204,77 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 }
             });
 
-            const groupBypatientClinical = _.groupBy(groupedMatches[key], 'patientClinical');
-            const ciKeys = Object.keys(groupBypatientClinical).sort();
-            let matches: Array<IClinicalGroupMatch> = [];
-            _.forEach(ciKeys, function(ciKey) {
-                let clinicalGroupMatch: IClinicalGroupMatch = {
-                    trialAgeNumerical: groupBypatientClinical[ciKey][0].trialAgeNumerical,
-                    trialOncotreePrimaryDiagnosis: groupBypatientClinical[ciKey][0].trialOncotreePrimaryDiagnosis,
+            let matches: Array<IArmMatch> = [];
+
+            const groupByArm = _.groupBy(groupedMatches[key], 'armDescription');
+            const aKeys = Object.keys(groupByArm).sort();
+            _.forEach(aKeys, function(aKey) {
+                let armMatch: IArmMatch = {
+                    armDescription: aKey,
                     matches: []
                 };
-                const groupByGenomicAlteration = _.groupBy(groupBypatientClinical[ciKey], 'genomicAlteration');
-                const gaKeys = Object.keys(groupByGenomicAlteration).sort((a,b) => {
-                    if (a.includes('!')) {
-                        if (b.includes('!')) { // a and b contain '!'
-                            return a.length - b.length || a.slice(1).localeCompare(b.slice(1));
-                        } else { // only a contains '!'
-                            return 1;
-                        }
-                    } else {
-                        if (b.includes('!')) { // only b contains '!'
-                            return -1;
-                        } else { // a and b don't contain '!'
-                            return a.length - b.length || a.localeCompare(b);
-                        }
-                    }
-                });
-
-                _.forEach(gaKeys, function(gaKey) {
-                    const groupByPatientGenomic = _.groupBy(groupByGenomicAlteration[gaKey], 'patientGenomic');
-                    const pgKeys = Object.keys(groupByPatientGenomic);
-                    let genomicGroupMatch: IGenomicGroupMatch = {
-                        genomicAlteration: gaKey,
+                const groupBypatientClinical = _.groupBy(groupByArm[aKey], 'patientClinical');
+                const ciKeys = Object.keys(groupBypatientClinical).sort();
+                _.forEach(ciKeys, function(ciKey) {
+                    let clinicalGroupMatch: IClinicalGroupMatch = {
+                        trialAgeNumerical: groupBypatientClinical[ciKey][0].trialAgeNumerical,
+                        trialOncotreePrimaryDiagnosis: groupBypatientClinical[ciKey][0].trialOncotreePrimaryDiagnosis,
                         matches: []
                     };
-                    _.forEach(pgKeys, function(pgKey) {
-                        let genomicMatch: IGenomicMatch = {
-                            trueHugoSymbol: groupByPatientGenomic[pgKey][0].trueHugoSymbol,
-                            trueProteinChange: groupByPatientGenomic[pgKey][0].trueProteinChange,
-                            sampleIds: []
-                        };
-                        const sampleIds = _.uniq(_.map(groupByPatientGenomic[pgKey], 'sampleId'));
-                        if (sampleIds.length > 1 && sampleManager) {
-                            sampleManager.samples.map((item:any) => {
-                                if (sampleIds.includes(item.id)) {
-                                    genomicMatch.sampleIds.push(item.id);
-                                }
-                            });
+                    const groupByGenomicAlteration = _.groupBy(groupBypatientClinical[ciKey], 'genomicAlteration');
+                    const gaKeys = Object.keys(groupByGenomicAlteration).sort((a,b) => {
+                        if (a.includes('!')) {
+                            if (b.includes('!')) { // a and b contain '!'
+                                return a.length - b.length || a.slice(1).localeCompare(b.slice(1));
+                            } else { // only a contains '!'
+                                return 1;
+                            }
                         } else {
-                            genomicMatch.sampleIds = sampleIds;
+                            if (b.includes('!')) { // only b contains '!'
+                                return -1;
+                            } else { // a and b don't contain '!'
+                                return a.length - b.length || a.localeCompare(b);
+                            }
                         }
-                        genomicGroupMatch.matches.push(genomicMatch);
                     });
 
-                    clinicalGroupMatch.matches.push(genomicGroupMatch);
-                });
+                    _.forEach(gaKeys, function(gaKey) {
+                        const groupByPatientGenomic = _.groupBy(groupByGenomicAlteration[gaKey], 'patientGenomic');
+                        const pgKeys = Object.keys(groupByPatientGenomic);
+                        let genomicGroupMatch: IGenomicGroupMatch = {
+                            genomicAlteration: gaKey,
+                            matches: []
+                        };
+                        _.forEach(pgKeys, function(pgKey) {
+                            let genomicMatch: IGenomicMatch = {
+                                trueHugoSymbol: groupByPatientGenomic[pgKey][0].trueHugoSymbol,
+                                trueProteinChange: groupByPatientGenomic[pgKey][0].trueProteinChange,
+                                sampleIds: []
+                            };
+                            const sampleIds = _.uniq(_.map(groupByPatientGenomic[pgKey], 'sampleId'));
+                            if (sampleIds.length > 1 && sampleManager) {
+                                sampleManager.samples.map((item:any) => {
+                                    if (sampleIds.includes(item.id)) {
+                                        genomicMatch.sampleIds.push(item.id);
+                                    }
+                                });
+                            } else {
+                                genomicMatch.sampleIds = sampleIds;
+                            }
+                            genomicGroupMatch.matches.push(genomicMatch);
+                        });
 
-                matches.push(clinicalGroupMatch);
+                        clinicalGroupMatch.matches.push(genomicGroupMatch);
+                    });
+
+                    armMatch.matches.push(clinicalGroupMatch);
+                });
+                matches.push(armMatch);
             });
 
             matchedTrial['matches'] = matches;
+
+            console.log(matches);
 
             _.some(nctTrials, function(trial) {
                 if (key === trial['nctId']) {
