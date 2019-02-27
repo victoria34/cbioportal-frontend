@@ -14,14 +14,22 @@
 .criteriaContainer {
   display: flex;
   justify-content: space-between;
-  //align-items: center;
+  align-items: center;
 
-  .left {
-    flex: 0 0 auto;
-    width: 150px;
-  }
-  .right{
+  .firstLeft {
     flex: 1 1 auto;
   }
-}
+  .firstRight{
+    display:flex;
+    flex: 0 0 auto;
+    width: 230px;
 
+    .secondLeft {
+      flex: 0 0 auto;
+      width: 50px;
+    }
+    .secondRight{
+      flex: 1 1 auto;
+    }
+  }
+}
