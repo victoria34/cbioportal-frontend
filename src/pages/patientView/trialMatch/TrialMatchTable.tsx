@@ -27,8 +27,6 @@ enum ColumnKey {
     ID = 'ID',
     TITLE = 'Title',
     INTERVENTIONS = 'Interventions',
-    AGE = 'Age',
-    CANCERTYPE = 'Cancer Type',
     MATCHINGCRITERIA = 'Matching Criteria'
 }
 
@@ -54,9 +52,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             [ColumnKey.ID]: 0.1 * this.props.containerWidth,
             [ColumnKey.TITLE]: 0.24 * this.props.containerWidth,
             [ColumnKey.INTERVENTIONS]: 0.16 * this.props.containerWidth,
-            [ColumnKey.AGE]: 0.03 * this.props.containerWidth,
-            [ColumnKey.CANCERTYPE]: 0.15 * this.props.containerWidth,
-            [ColumnKey.MATCHINGCRITERIA]: 0.32 * this.props.containerWidth
+            [ColumnKey.MATCHINGCRITERIA]: 0.5 * this.props.containerWidth
         };
     }
 
@@ -83,65 +79,70 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             return <div>
                 {trial.matches.map((armMatch: any, index: number) => (
                     <div>
-                        <div className={styles.criteriaContainer}>
+                        <div>
                             <If condition={armMatch.armDescription !== 'null'}>
-                                <span className={styles.left}>{armMatch.armDescription}</span>
+                                <span>{armMatch.armDescription + ':'}</span>
                             </If>
-                            <span className={styles.right}>
+                            <div>
                                 {armMatch.matches.map((clinicalGroupMatch: any) => (
-                                    <span>
-                                        {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
-                                            <If condition={genomicGroupMatch.genomicAlteration.includes('!')}>
-                                                <Then>
-                                                    <div>
-                                                        <span className={styles.genomicSpan}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '',) + ' '}
-                                                            {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
-                                                                <span className={styles.genomicSpan}>
-                                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                </span>
-                                                            ))}
-                                                        </span>
-                                                    </div>
-                                                </Then>
-                                                <Else>
-                                                    <If condition={genomicGroupMatch.matches.length === 1 &&
-                                                    genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
-                                                        <Then>
-                                                            <div>
-                                                                <span>{genomicGroupMatch.genomicAlteration + ' '}
-                                                                    {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
-                                                                        <span className={styles.genomicSpan}>
-                                                                            {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                        </span>
-                                                                    ))}
-                                                                </span>
-                                                            </div>
-                                                        </Then>
-                                                        <Else>
-                                                            <div>
-                                                                <span className={styles.genomicSpan}>
-                                                                    {genomicGroupMatch.genomicAlteration + ' ( '}
-                                                                    {genomicGroupMatch.matches.map((genomicMatch: any) => (
-                                                                        <span>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
-                                                                            {genomicMatch.sampleIds.map((sampleId: string) => (
-                                                                                <span className={styles.genomicSpan}>
-                                                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                                </span>
-                                                                            ))}
-                                                                        </span>
-                                                                    ))}
-                                                                    {')'}
-                                                                </span>
-                                                            </div>
-                                                        </Else>
-                                                    </If>
-                                                </Else>
-                                            </If>
-                                        ))}
+                                    <span className={styles.criteriaContainer}>
+                                        <span className={styles.firstLeft}>
+                                            {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
+                                                <If condition={genomicGroupMatch.genomicAlteration.includes('!')}>
+                                                    <Then>
+                                                        <div>
+                                                            <span className={styles.genomicSpan + styles.firstLeft}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '',) + ' '}
+                                                                {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                                    <span className={styles.genomicSpan}>
+                                                                        {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                    </span>
+                                                                ))}
+                                                            </span>
+                                                        </div>
+                                                    </Then>
+                                                    <Else>
+                                                        <If condition={genomicGroupMatch.matches.length === 1 &&
+                                                        genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
+                                                            <Then>
+                                                                <div>
+                                                                    <span>{genomicGroupMatch.genomicAlteration + ' '}
+                                                                        {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                                            <span className={styles.genomicSpan}>
+                                                                                {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                            </span>
+                                                                        ))}
+                                                                    </span>
+                                                                </div>
+                                                            </Then>
+                                                            <Else>
+                                                                <div>
+                                                                    <span className={styles.genomicSpan + styles.firstLeft}>
+                                                                        {genomicGroupMatch.genomicAlteration + ' ( '}
+                                                                        {genomicGroupMatch.matches.map((genomicMatch: any) => (
+                                                                            <span>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
+                                                                                {genomicMatch.sampleIds.map((sampleId: string) => (
+                                                                                    <span className={styles.genomicSpan}>
+                                                                                        {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                                    </span>
+                                                                                ))}
+                                                                            </span>
+                                                                        ))}
+                                                                        {')'}
+                                                                    </span>
+                                                                </div>
+                                                            </Else>
+                                                        </If>
+                                                    </Else>
+                                                </If>
+                                            ))}
+                                        </span>
+                                        <span className={styles.firstRight}>
+                                            <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical}</span>
+                                            <span className={styles.secondRight}>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis}</span>
+                                        </span>
                                     </span>
                                 ))}
-                            </span>
-
+                            </div>
                         </div>
                         <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
                     </div>
@@ -149,36 +150,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 </div>
         },
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
-    }, {
-        name: ColumnKey.AGE,
-        render: (trial: IDiscreteTrialMatch) => (
-                <div>
-                    {trial.matches.map((armMatch: any, index: number) => (
-                        <div>
-                            {armMatch.matches.map((clinicalGroupMatch: any) => (
-                                <span>{clinicalGroupMatch.trialAgeNumerical}</span>
-                            ))}
-                            <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
-                        </div>
-                    ))}
-                </div>
-        ),
-        width: this.columnsWidth[ColumnKey.AGE]
-    }, {
-        name: ColumnKey.CANCERTYPE,
-        render: (trial: IDiscreteTrialMatch) => (
-            <div>
-                {trial.matches.map((armMatch: any, index: number) => (
-                    <div>
-                        {armMatch.matches.map((clinicalGroupMatch: any) => (
-                            <span>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis}</span>
-                        ))}
-                        <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
-                    </div>
-                ))}
-            </div>
-        ),
-        width: this.columnsWidth[ColumnKey.CANCERTYPE]
     }, {
         name: ColumnKey.INTERVENTIONS,
         render: (trial: IDiscreteTrialMatch) => (
@@ -273,8 +244,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             });
 
             matchedTrial['matches'] = matches;
-
-            console.log(matches);
 
             _.some(nctTrials, function(trial) {
                 if (key === trial['nctId']) {
