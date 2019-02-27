@@ -60,6 +60,6 @@ export interface IDiscreteTrialMatch {
     shortTitle: string;
     status: string;
     interventions: Array<string>;
-    armMatches: Array<IArmMatch> | null;
-    matches: Array<IClinicalGroupMatch>;
+    // armMatches: Array<IArmMatch> | null;
+    matches: Array<IArmMatch>;
 }
