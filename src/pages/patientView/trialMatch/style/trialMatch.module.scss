@@ -11,3 +11,17 @@
 .genomicSpan {
    margin-right:5px;
 }
+.criteriaContainer {
+  display: flex;
+  justify-content: space-between;
+  //align-items: center;
+
+  .left {
+    flex: 0 0 auto;
+    width: 150px;
+  }
+  .right{
+    flex: 1 1 auto;
+  }
+}
+
