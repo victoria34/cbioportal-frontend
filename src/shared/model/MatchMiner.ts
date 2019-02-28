@@ -37,15 +37,11 @@ export interface IClinicalGroupMatch {
     trialAgeNumerical: string | null;
     trialOncotreePrimaryDiagnosis: string| null;
     matches: Array<IGenomicGroupMatch>;
+    notMatches: Array<IGenomicGroupMatch>;
 }
 export interface IGenomicGroupMatch {
     genomicAlteration: string;
     matches: Array<IGenomicMatch>;
-}
-
-export interface IArmMatch {
-    armDescription: string | null;
-    matches: Array<IClinicalGroupMatch>;
 }
 
 export interface INctTrial {
@@ -53,13 +49,13 @@ export interface INctTrial {
     interventions: Array<string>;
 }
 
-export interface IDiscreteTrialMatch {
+export interface IDetailedTrialMatch {
     nctId: string;
     protocolNo: string | null;
     phase: string;
     shortTitle: string;
     status: string;
     interventions: Array<string>;
-    // armMatches: Array<IArmMatch> | null;
-    matches: Array<IArmMatch>;
+    armDescription: string | null;
+    matches: Array<IClinicalGroupMatch>;
 }
