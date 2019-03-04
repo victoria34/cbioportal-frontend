@@ -41,7 +41,7 @@ import {
     fetchMutSigData, findMrnaRankMolecularProfileId, mergeDiscreteCNAData, fetchSamplesForPatient, fetchClinicalData,
     fetchCopyNumberSegments, fetchClinicalDataForPatient, makeStudyToCancerTypeMap,
     fetchCivicGenes, fetchCnaCivicGenes, fetchCivicVariants, groupBySampleId, findSamplesWithoutCancerTypeClinicalData,
-    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData
+    fetchStudiesForSamplesWithoutCancerTypeClinicalData, fetchOncoKbAnnotatedGenesSuppressErrors, concatMutationData,
     getMatchMinerTrials, getNctTrials
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";

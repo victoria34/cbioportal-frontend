@@ -113,15 +113,30 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                     <div>
                                         <span className={styles.genomicSpan}>
                                             {genomicGroupMatch.genomicAlteration + ' ( '}
-                                            {genomicGroupMatch.matches.map((genomicMatch: any) => (
-                                                <span>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
-                                                    {genomicMatch.sampleIds.map((sampleId: string) => (
-                                                        <span className={styles.genomicSpan}>
-                                                            {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                        </span>
+                                            <If condition={genomicGroupMatch.matches.length > 1}>
+                                                <Then>
+                                                    <ul className={styles.alterationUl}>
+                                                    {genomicGroupMatch.matches.map((genomicMatch: any) => (
+                                                        <li>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
+                                                            {genomicMatch.sampleIds.map((sampleId: string) => (
+                                                                <span className={styles.genomicSpan}>
+                                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                </span>
+                                                            ))}
+                                                        </li>
                                                     ))}
-                                                </span>
-                                            ))}
+                                                    </ul>
+                                                </Then>
+                                                <Else>
+                                                    <span>{genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange + ' '}
+                                                        {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                            <span className={styles.genomicSpan}>
+                                                                {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                            </span>
+                                                                ))}
+                                                    </span>
+                                                </Else>
+                                            </If>
                                             {')'}
                                         </span>
                                     </div>
