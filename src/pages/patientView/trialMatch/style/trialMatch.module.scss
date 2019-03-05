@@ -27,11 +27,13 @@
   .firstRight{
     display:flex;
     flex: 0 0 auto;
-    width: 230px;
+    width: 250px;
+    justify-content: space-between;
 
     .secondLeft {
       flex: 0 0 auto;
-      width: 50px;
+      width: 80px;
+      margin-right: 20px;
     }
     .secondRight{
       flex: 1 1 auto;
