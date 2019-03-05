@@ -82,7 +82,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     <div>
                         <div>
                             <If condition={armMatch.armDescription !== 'null'}>
-                                <span><b>{armMatch.armDescription + ':'}</b></span>
+                                <span><b>{'Arm: ' + armMatch.armDescription}</b></span>
                             </If>
                             <div>
                                 {armMatch.matches.map((clinicalGroupMatch: any) => (
@@ -105,7 +105,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                                     <Else>
                                                         <div>
                                                             <span className={styles.genomicSpan + styles.firstLeft}>
-                                                                {genomicGroupMatch.genomicAlteration + ' ( '}
+                                                                {genomicGroupMatch.genomicAlteration + ': '}
                                                                 <If condition={genomicGroupMatch.matches.length > 1}>
                                                                     <Then>
                                                                         <ul className={styles.alterationUl}>
@@ -130,7 +130,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                                                         </span>
                                                                     </Else>
                                                                 </If>
-                                                                {')'}
                                                             </span>
                                                         </div>
                                                     </Else>
@@ -146,7 +145,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                                         destroyTooltipOnHide={false}
                                                         onPopupAlign={placeArrowBottomLeft}
                                                     >
-                                                        {this.mainContent('NOT logic genomic alterations')}
+                                                        {this.mainContent('No alterations in XXX genes defined by the trial')}
                                                     </DefaultTooltip>
                                                 </Then>
                                                 <Else>
@@ -163,7 +162,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                             </If>
                                         </span>
                                         <span className={styles.firstRight}>
-                                            <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical}</span>
+                                            <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical + ' yrs old'}</span>
                                             <span className={styles.secondRight}>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis}</span>
                                         </span>
                                     </span>
