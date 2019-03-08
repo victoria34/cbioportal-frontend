@@ -48,6 +48,7 @@ import {AppStore} from "../../AppStore";
 import request from 'superagent';
 import {remoteData} from "../../shared/api/remoteData";
 import TrialMatchTable from "./trialMatch/TrialMatchTable";
+import getBrowserWindow from "../../shared/lib/getBrowserWindow";
 
 const patientViewPageStore = new PatientViewPageStore();
 
@@ -546,14 +547,16 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                     </MSKTab>
                     )}
 
-                    <MSKTab key={7} id="trialMatchTab" linkText="Trial Match"
-                            hide={!this.shouldShowTrialMatch(patientViewPageStore)}>
-                        <TrialMatchTable sampleManager={sampleManager}
-                                         trialMatches={patientViewPageStore.trialMatches.result}
-                                         trials={patientViewPageStore.matchMinerTrials.result}
-                                         nctTrials={patientViewPageStore.nctTrials.result}
-                                         containerWidth={WindowStore.size.width-20}/>
-                    </MSKTab>
+                    {(getBrowserWindow().localStorage.trialmatch === 'true') && (
+                        <MSKTab key={7} id="trialMatchTab" linkText="Trial Match"
+                                hide={!this.shouldShowTrialMatch(patientViewPageStore)}>
+                            <TrialMatchTable sampleManager={sampleManager}
+                                             trialMatches={patientViewPageStore.trialMatches.result}
+                                             trials={patientViewPageStore.matchMinerTrials.result}
+                                             nctTrials={patientViewPageStore.nctTrials.result}
+                                             containerWidth={WindowStore.size.width-20}/>
+                        </MSKTab>
+                    )}
 
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
                         {/*<div className="clearfix">*/}
