@@ -66,12 +66,16 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 <span>{trial.status}</span>
             </div>
         ),
+        sortBy:(trial: IDetailedTrialMatch) => (trial.protocolNo),
+        download: (trial: IDetailedTrialMatch) => (trial.protocolNo + ', ' + trial.nctId + ', ' + trial.status),
         width: this.columnsWidth[ColumnKey.ID]
     }, {
         name: ColumnKey.TITLE,
         render: (trial: IDetailedTrialMatch) => (
                 <span>{trial.shortTitle}</span>
         ),
+        sortBy:(trial: IDetailedTrialMatch) => (trial.shortTitle),
+        download:(trial: IDetailedTrialMatch) => (trial.shortTitle),
         width: this.columnsWidth[ColumnKey.TITLE]
     }, {
         name: ColumnKey.MATCHINGCRITERIA,
@@ -181,6 +185,8 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     ))}
                 </ul>
         ),
+        sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+        download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
         width: this.columnsWidth[ColumnKey.INTERVENTIONS]
     }];
 
