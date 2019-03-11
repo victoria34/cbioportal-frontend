@@ -59,8 +59,8 @@ export async function getNctTrial(nctId: string): Promise<INctTrial> {
         _.forEach(response.arms, function(arm) {
             if (arm.interventions) {
                 _.forEach(arm.interventions, function(intervention) {
-                    if (intervention.inclusion_indicator === 'TRIAL' && intervention.intervention_type === 'Drug') {
-                        interventions.push(intervention.intervention_name);
+                    if (intervention.inclusion_indicator === 'TRIAL' && intervention.intervention_type !== 'Other') {
+                        interventions.push(intervention.intervention_type + ': ' + intervention.intervention_name);
                     }
                 });
             }
