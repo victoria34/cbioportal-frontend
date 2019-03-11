@@ -10,8 +10,8 @@ import { buildCBioPortalAPIUrl } from "./urls";
 const cbioportalUrl = buildCBioPortalAPIUrl('api-legacy/proxy/matchminer/api');
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
     return request.post(cbioportalUrl + '/query_trial_match')
-    .set('Content-Type', 'text/plain')
-    .send(JSON.stringify(query))
+    .set('Content-Type', 'application/json')
+    .send(query)
     .then((res) => {
         let response = JSON.parse(JSON.parse(res.text));
         return response.map((record:any) => ({
