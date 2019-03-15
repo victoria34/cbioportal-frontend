@@ -13,7 +13,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
     .set('Content-Type', 'application/json')
     .send(query)
     .then((res) => {
-        let response = JSON.parse(JSON.parse(res.text));
+        const response = JSON.parse(JSON.parse(res.text));
         return response.map((record:any) => ({
             nctId: record.nct_id,
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
@@ -39,7 +39,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
 export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
     return request.get(cbioportalUrl + '/query_trial/'+ nctId)
     .then((res) => {
-        let response = JSON.parse(JSON.parse(res.text));
+        const response = JSON.parse(JSON.parse(res.text));
         return {
             nctId: response.nct_id,
             protocolNo: response.protocol_no,
@@ -54,7 +54,7 @@ export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
 export async function getNctTrial(nctId: string): Promise<INctTrial> {
     return request.get('https://clinicaltrialsapi.cancer.gov/v1/clinical-trial/'+ nctId)
     .then((res) => {
-        let response = JSON.parse(res.text);
+        const response = JSON.parse(res.text);
         let interventions: Array<string> = [];
         _.forEach(response.arms, function(arm) {
             if (arm.interventions) {

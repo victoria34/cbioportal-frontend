@@ -23,8 +23,8 @@ export interface ITrialMatch {
     genomicAlteration: string;
     patientClinical: string | null;
     patientGenomic: string | null;
-    trialAgeNumerical: string | null;
-    trialOncotreePrimaryDiagnosis: string| null;
+    trialAgeNumerical: string;
+    trialOncotreePrimaryDiagnosis: string;
 }
 
 export interface IGenomicMatch {
@@ -34,8 +34,8 @@ export interface IGenomicMatch {
 }
 
 export interface IClinicalGroupMatch {
-    trialAgeNumerical: string | null;
-    trialOncotreePrimaryDiagnosis: string| null;
+    trialAgeNumerical: string;
+    trialOncotreePrimaryDiagnosis: Array<string>;
     matches: Array<IGenomicGroupMatch>;
     notMatches: Array<IGenomicGroupMatch>;
 }
