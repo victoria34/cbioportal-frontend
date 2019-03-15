@@ -1,9 +1,11 @@
+.armSpan {
+  font-weight: 500;
+}
 .criteriaHr {
   margin:3px 0 3px 0 !important;
 }
 .diseasesUl {
    padding-left: 15px;
-   //list-style-type: none;
 }
 .alterationUl{
   margin-bottom: 0 !important;
@@ -19,7 +21,6 @@
 .criteriaContainer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 
   .firstLeft {
     flex: 1 1 auto;
@@ -33,7 +34,7 @@
     .secondLeft {
       flex: 0 0 auto;
       width: 80px;
-      margin-right: 20px;
+      margin-right: 10px;
     }
     .secondRight{
       flex: 1 1 auto;

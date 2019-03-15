@@ -86,7 +86,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     <div>
                         <div>
                             <If condition={armMatch.armDescription !== 'null'}>
-                                <span><b>{'Arm: ' + armMatch.armDescription}</b></span>
+                                <span className={styles.armSpan}>{'Arm: ' + armMatch.armDescription}</span>
                             </If>
                             <div>
                                 {armMatch.matches.map((clinicalGroupMatch: any, cgIndex:number) => (
@@ -155,14 +155,18 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                             </span>
                                             <span className={styles.firstRight}>
                                                 <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical + ' yrs old'}</span>
-                                                <If condition={clinicalGroupMatch.trialOncotreePrimaryDiagnosis.includes('!')}>
-                                                    <Then>
-                                                        <span className={styles.secondRight}><b>Not </b>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis.replace(/!/g, '') }</span>
-                                                    </Then>
-                                                    <Else>
-                                                        <span className={styles.secondRight}>{clinicalGroupMatch.trialOncotreePrimaryDiagnosis}</span>
-                                                    </Else>
-                                                </If>
+                                                <span className={styles.secondRight}>
+                                                    {clinicalGroupMatch.trialOncotreePrimaryDiagnosis.map((cancerType: string) => (
+                                                        <If condition={cancerType.includes('!')}>
+                                                            <Then>
+                                                                <div><b>Not </b>{cancerType.replace(/!/g, '') }</div>
+                                                            </Then>
+                                                            <Else>
+                                                                <div>{cancerType}</div>
+                                                            </Else>
+                                                        </If>
+                                                    ))}
+                                                </span>
                                             </span>
                                         </span>
                                         <If condition={cgIndex < armMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
@@ -175,6 +179,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 ))}
                 </div>
         },
+        sortBy:(trial: IDetailedTrialMatch) => (trial.matches[0].armDescription),
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
     }, {
         name: ColumnKey.INTERVENTIONS,
@@ -250,16 +255,17 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     armDescription: aKey,
                     matches: []
                 };
-                const groupBypatientClinical = _.groupBy(groupByArm[aKey], 'patientClinical');
-                const ciKeys = Object.keys(groupBypatientClinical);
-                _.forEach(ciKeys, function(ciKey) {
+                const groupByAge = _.groupBy(groupByArm[aKey], 'trialAgeNumerical');
+                const ageKeys = Object.keys(groupByAge);
+                _.forEach(ageKeys, function(ageKey) {
+                    const cancerTypes =  _.uniq(_.map(groupByAge[ageKey], 'trialOncotreePrimaryDiagnosis')).sort().reverse();
                     let clinicalGroupMatch: IClinicalGroupMatch = {
-                        trialAgeNumerical: groupBypatientClinical[ciKey][0].trialAgeNumerical,
-                        trialOncotreePrimaryDiagnosis: groupBypatientClinical[ciKey][0].trialOncotreePrimaryDiagnosis,
+                        trialAgeNumerical: ageKey,
+                        trialOncotreePrimaryDiagnosis: cancerTypes,
                         matches: [],
                         notMatches: []
                     };
-                    const groupByGenomicAlteration = _.groupBy(groupBypatientClinical[ciKey], 'genomicAlteration');
+                    const groupByGenomicAlteration = _.groupBy(groupByAge[ageKey], 'genomicAlteration');
                     const gaKeys = Object.keys(groupByGenomicAlteration).sort();
                     _.forEach(gaKeys, function(gaKey) {
                         const groupByPatientGenomic = _.groupBy(groupByGenomicAlteration[gaKey], 'patientGenomic');
