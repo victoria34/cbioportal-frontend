@@ -35,7 +35,10 @@ export interface IGenomicMatch {
 
 export interface IClinicalGroupMatch {
     trialAgeNumerical: string;
-    trialOncotreePrimaryDiagnosis: Array<string>;
+    trialOncotreePrimaryDiagnosis: {
+        general: Array<string>,
+        not: Array<string>
+    };
     matches: Array<IGenomicGroupMatch>;
     notMatches: Array<IGenomicGroupMatch>;
 }

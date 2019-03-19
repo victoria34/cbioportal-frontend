@@ -67,7 +67,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             </div>
         ),
         sortBy:(trial: IDetailedTrialMatch) => (trial.protocolNo),
-        download: (trial: IDetailedTrialMatch) => (trial.protocolNo + ', ' + trial.nctId + ', ' + trial.status),
+        // download: (trial: IDetailedTrialMatch) => (trial.protocolNo + ', ' + trial.nctId + ', ' + trial.status),
         width: this.columnsWidth[ColumnKey.ID]
     }, {
         name: ColumnKey.TITLE,
@@ -75,7 +75,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 <span>{trial.shortTitle}</span>
         ),
         sortBy:(trial: IDetailedTrialMatch) => (trial.shortTitle),
-        download:(trial: IDetailedTrialMatch) => (trial.shortTitle),
+        // download:(trial: IDetailedTrialMatch) => (trial.shortTitle),
         width: this.columnsWidth[ColumnKey.TITLE]
     }, {
         name: ColumnKey.MATCHINGCRITERIA,
@@ -90,87 +90,98 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                             </If>
                             <div>
                                 {armMatch.matches.map((clinicalGroupMatch: any, cgIndex:number) => (
-                                    <div>
-                                        <span className={styles.criteriaContainer}>
-                                            <span className={styles.firstLeft}>
-                                                {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
-                                                    <If condition={genomicGroupMatch.matches.length === 1 &&
-                                                    genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
-                                                        <Then>
-                                                            <div>
-                                                                <span>{genomicGroupMatch.genomicAlteration + ' '}
-                                                                    {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
-                                                                        <span className={styles.genomicSpan}>
-                                                                            {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                        </span>
-                                                                    ))}
-                                                                </span>
-                                                            </div>
-                                                        </Then>
-                                                        <Else>
-                                                            <div>
-                                                                <span className={styles.genomicSpan + styles.firstLeft}>
-                                                                    {genomicGroupMatch.genomicAlteration + ': '}
-                                                                    <If condition={genomicGroupMatch.matches.length > 1}>
-                                                                        <Then>
-                                                                            <ul className={styles.alterationUl}>
-                                                                            {genomicGroupMatch.matches.map((genomicMatch: any) => (
-                                                                                <li>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
-                                                                                    {genomicMatch.sampleIds.map((sampleId: string) => (
-                                                                                        <span className={styles.genomicSpan}>
-                                                                                            {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                                        </span>
-                                                                                    ))}
-                                                                                </li>
-                                                                            ))}
-                                                                            </ul>
-                                                                        </Then>
-                                                                        <Else>
-                                                                            <span>{genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange + ' '}
-                                                                                {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                    <span className={styles.criteriaContainer}>
+                                        <span className={styles.firstLeft}>
+                                            {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
+                                                <If condition={genomicGroupMatch.matches.length === 1 &&
+                                                genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
+                                                    <Then>
+                                                        <div>
+                                                            <span>{genomicGroupMatch.genomicAlteration + ' '}
+                                                                {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                                    <span className={styles.genomicSpan}>
+                                                                        {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                    </span>
+                                                                ))}
+                                                            </span>
+                                                        </div>
+                                                    </Then>
+                                                    <Else>
+                                                        <div>
+                                                            <span className={styles.genomicSpan + styles.firstLeft}>
+                                                                {genomicGroupMatch.genomicAlteration + ': '}
+                                                                <If condition={genomicGroupMatch.matches.length > 1}>
+                                                                    <Then>
+                                                                        <ul className={styles.alterationUl}>
+                                                                        {genomicGroupMatch.matches.map((genomicMatch: any) => (
+                                                                            <li>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
+                                                                                {genomicMatch.sampleIds.map((sampleId: string) => (
                                                                                     <span className={styles.genomicSpan}>
                                                                                         {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
                                                                                     </span>
                                                                                 ))}
-                                                                            </span>
-                                                                        </Else>
-                                                                    </If>
-                                                                </span>
-                                                            </div>
-                                                        </Else>
-                                                    </If>
-                                                ))}
-                                                <If condition={clinicalGroupMatch.notMatches.length > 0}>
-                                                    <DefaultTooltip
-                                                        placement='bottomLeft'
-                                                        trigger={['hover', 'focus']}
-                                                        overlay={this.tooltipContent(clinicalGroupMatch.notMatches)}
-                                                        arrowContent={<div className="rc-tooltip-arrow-inner" />}
-                                                        destroyTooltipOnHide={false}
-                                                        onPopupAlign={placeArrowBottomLeft}
-                                                    >
-                                                        {this.mainContent('No alterations in ' + this.getHugoSymbolName(clinicalGroupMatch.notMatches, 3) + ' genes defined by the trial')}
-                                                    </DefaultTooltip>
+                                                                            </li>
+                                                                        ))}
+                                                                        </ul>
+                                                                    </Then>
+                                                                    <Else>
+                                                                        <span>{genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange + ' '}
+                                                                            {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                                                <span className={styles.genomicSpan}>
+                                                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                                </span>
+                                                                            ))}
+                                                                        </span>
+                                                                    </Else>
+                                                                </If>
+                                                            </span>
+                                                        </div>
+                                                    </Else>
                                                 </If>
-                                            </span>
-                                            <span className={styles.firstRight}>
-                                                <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical + ' yrs old'}</span>
-                                                <span className={styles.secondRight}>
-                                                    {clinicalGroupMatch.trialOncotreePrimaryDiagnosis.map((cancerType: string) => (
-                                                        <If condition={cancerType.includes('!')}>
+                                            ))}
+                                            <If condition={clinicalGroupMatch.notMatches.length > 0}>
+                                                <DefaultTooltip
+                                                    placement='bottomLeft'
+                                                    trigger={['hover', 'focus']}
+                                                    overlay={this.tooltipGenomicContent(clinicalGroupMatch.notMatches)}
+                                                    arrowContent={<div className="rc-tooltip-arrow-inner" />}
+                                                    destroyTooltipOnHide={false}
+                                                    onPopupAlign={placeArrowBottomLeft}
+                                                >
+                                                    {this.mainContent('No alterations in ' + this.getHugoSymbolName(clinicalGroupMatch.notMatches, 3) + ' defined by the trial')}
+                                                </DefaultTooltip>
+                                            </If>
+                                        </span>
+                                        <span className={styles.firstRight}>
+                                            <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical + ' yrs old'}</span>
+                                            <span className={styles.secondRight}>
+                                                {clinicalGroupMatch.trialOncotreePrimaryDiagnosis.general.join(', ')}
+                                                <If condition={clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.length > 0}>
+                                                    <span>
+                                                        <b> except in </b>
+                                                        <If condition={clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.length < 4}>
                                                             <Then>
-                                                                <div><b>Not </b>{cancerType.replace(/!/g, '') }</div>
+                                                                {clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.join(', ').replace(/,(?!.*,)/gmi, ' and')}
                                                             </Then>
                                                             <Else>
-                                                                <div>{cancerType}</div>
+                                                                <DefaultTooltip
+                                                                    placement='bottomLeft'
+                                                                    trigger={['hover', 'focus']}
+                                                                    overlay={this.tooltipClinicalContent(clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not)}
+                                                                    arrowContent={<div className="rc-tooltip-arrow-inner" />}
+                                                                    destroyTooltipOnHide={false}
+                                                                    onPopupAlign={placeArrowBottomLeft}
+                                                                >
+                                                                    {this.mainContent(clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.length + ' cancer types')}
+                                                                </DefaultTooltip>
                                                             </Else>
                                                         </If>
-                                                    ))}
-                                                </span>
+                                                    </span>
+                                                </If>
                                             </span>
                                         </span>
-                                        <If condition={cgIndex < armMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
-                                    </div>
+                                    <If condition={cgIndex < armMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                                    </span>
                                 ))}
                             </div>
                         </div>
@@ -191,16 +202,16 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 </ul>
         ),
         sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
-        download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
         width: this.columnsWidth[ColumnKey.INTERVENTIONS]
     }];
 
-    public tooltipContent(data: Array<IGenomicGroupMatch>) {
+    public tooltipGenomicContent(data: Array<IGenomicGroupMatch>) {
         const props = this.props;
         return (
             <div style={{ maxHeight:400, maxWidth:600, overflow:'auto' }}>
                 {data.map((genomicGroupMatch: any) => (
-                    <div className={styles.genomicSpan}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '',) + ' '}
+                    <div className={styles.genomicSpan}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '') + ' '}
                         {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
                             <span className={styles.genomicSpan}>
                                 {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
@@ -208,6 +219,17 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         ))}
                     </div>
                 ))}
+            </div>
+        );
+    }
+    public tooltipClinicalContent(data: Array<string>) {
+        return (
+            <div style={{ maxHeight:400, maxWidth:600, overflow:'auto' }}>
+                <ul className={styles.alterationUl}>
+                    {data.map((cancerType: string) => (
+                        <li>{cancerType}</li>
+                    ))}
+                </ul>
             </div>
         );
     }
@@ -225,7 +247,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         if (hugoSymbolSet.size <= threshold) {
             return [...hugoSymbolSet].join(', ');
         }
-        return hugoSymbolSet.size;
+        return hugoSymbolSet.size + ' genes' ;
     }
 
     public buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>, sampleManager?: SampleManager) {
@@ -258,10 +280,22 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 const groupByAge = _.groupBy(groupByArm[aKey], 'trialAgeNumerical');
                 const ageKeys = Object.keys(groupByAge);
                 _.forEach(ageKeys, function(ageKey) {
-                    const cancerTypes =  _.uniq(_.map(groupByAge[ageKey], 'trialOncotreePrimaryDiagnosis')).sort().reverse();
+                    const cancerTypes =  _.uniq(_.map(groupByAge[ageKey], 'trialOncotreePrimaryDiagnosis'));
+                    let generalCancerTypes: Array<string> = [];
+                    let notCancerTypes: Array<string> = [];
+                    _.map(cancerTypes, function(item) {
+                       if (item.indexOf('!') !== -1) {
+                           notCancerTypes.push(item.replace(/!/g, ''));
+                       } else {
+                           generalCancerTypes.push(item);
+                       }
+                    });
                     let clinicalGroupMatch: IClinicalGroupMatch = {
                         trialAgeNumerical: ageKey,
-                        trialOncotreePrimaryDiagnosis: cancerTypes,
+                        trialOncotreePrimaryDiagnosis: {
+                            general: generalCancerTypes,
+                            not: notCancerTypes
+                        },
                         matches: [],
                         notMatches: []
                     };
@@ -313,6 +347,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             <TrialMatchTableComponent
                 data={this.state.detailedTrialMatches}
                 columns={this._columns}
+                showCopyDownload={false}
             />
         )
     }
