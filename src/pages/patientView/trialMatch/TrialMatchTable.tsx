@@ -86,7 +86,14 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     <div>
                         <div>
                             <If condition={armMatch.armDescription !== 'null'}>
-                                <span className={styles.armSpan}>{'Arm: ' + armMatch.armDescription}</span>
+                                <div>
+                                    <span className={styles.armSpan}>{'Arm: ' + armMatch.armDescription}</span>
+                                </div>
+                            </If>
+                            <If condition={armMatch.drugs.length > 0}>
+                                <div>
+                                    <span className={styles.armSpan}>{'Drug: ' + armMatch.drugs.join(', ')}</span>
+                                </div>
                             </If>
                             <div>
                                 {armMatch.matches.map((clinicalGroupMatch: any, cgIndex:number) => (
@@ -195,11 +202,13 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
     }, {
         name: ColumnKey.INTERVENTIONS,
         render: (trial: IDetailedTrialMatch) => (
+            <If condition={trial.interventions.length > 0}>
                 <ul className={styles.diseasesUl}>
                     {trial.interventions.map((intervention: any) => (
                         <li>{intervention}</li>
                     ))}
                 </ul>
+            </If>
         ),
         sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
         // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
@@ -256,15 +265,10 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         const trialIds = Object.keys(groupedMatches);
         _.forEach(trialIds, function (key) {
             let matchedTrial:any = {};
+            let hasArmDrug = false;
             _.some(trials, function(trial) {
                 if (key === trial['nctId']) {
                     matchedTrial = trial;
-                    return true;
-                }
-            });
-            _.some(nctTrials, function(trial) {
-                if (key === trial['nctId']) {
-                    matchedTrial['interventions'] = trial['interventions'];
                     return true;
                 }
             });
@@ -275,8 +279,16 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
             _.forEach(aKeys, function(aKey) {
                 let armMatch: IArmMatch = {
                     armDescription: aKey,
+                    drugs: [],
                     matches: []
                 };
+                _.some(matchedTrial['treatmentList']['step'][0]['arm'], function(arm) {
+                    if ( aKey === arm[ 'arm_description' ] && arm[ 'drugs' ] ) {
+                        armMatch.drugs = _.map(arm[ 'drugs' ], 'name');
+                        hasArmDrug = true;
+                        return true;
+                    }
+                });
                 const groupByAge = _.groupBy(groupByArm[aKey], 'trialAgeNumerical');
                 const ageKeys = Object.keys(groupByAge);
                 _.forEach(ageKeys, function(ageKey) {
@@ -337,6 +349,18 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 });
                 matchedTrial['matches'].push(armMatch);
             });
+
+            if (hasArmDrug) {
+                matchedTrial['interventions'] = [];
+            } else {
+                _.some(nctTrials, function(trial) {
+                    if (key === trial['nctId']) {
+                        matchedTrial['interventions'] = trial['interventions'];
+                        return true;
+                    }
+                });
+            }
+
             matchedTrials.push(matchedTrial);
         });
         return matchedTrials;
