@@ -49,6 +49,7 @@ export interface IGenomicGroupMatch {
 
 export interface IArmMatch {
     armDescription: string | null;
+    drugs: Array<string> | null;
     matches: Array<IClinicalGroupMatch>;
 }
 
