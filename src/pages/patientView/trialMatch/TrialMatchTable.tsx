@@ -86,12 +86,12 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     <div>
                         <div>
                             <If condition={armMatch.armDescription !== 'null'}>
-                                <div>
+                                <div className={styles.armDiv}>
                                     <span><b>Arm: </b> {armMatch.armDescription}</span>
                                 </div>
                             </If>
                             <If condition={armMatch.drugs.length > 0}>
-                                <div>
+                                <div className={styles.armDiv}>
                                     <span><b>Drug: </b>{armMatch.drugs.join(', ')}</span>
                                 </div>
                             </If>
