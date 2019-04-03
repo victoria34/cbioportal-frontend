@@ -66,4 +66,6 @@ export interface IDetailedTrialMatch {
     status: string;
     interventions: Array<string>;
     matches: Array<IArmMatch>;
+    controlArm: boolean;
+    priority: number;
 }
