@@ -87,12 +87,12 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         <div>
                             <If condition={armMatch.armDescription !== 'null'}>
                                 <div>
-                                    <span className={styles.armSpan}>{'Arm: ' + armMatch.armDescription}</span>
+                                    <span><b>Arm: </b> {armMatch.armDescription}</span>
                                 </div>
                             </If>
                             <If condition={armMatch.drugs.length > 0}>
                                 <div>
-                                    <span className={styles.armSpan}>{'Drug: ' + armMatch.drugs.join(', ')}</span>
+                                    <span><b>Drug: </b>{armMatch.drugs.join(', ')}</span>
                                 </div>
                             </If>
                             <div>
@@ -265,10 +265,17 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         const trialIds = Object.keys(groupedMatches);
         _.forEach(trialIds, function (key) {
             let matchedTrial:any = {};
-            let hasArmDrug = false;
             _.some(trials, function(trial) {
                 if (key === trial['nctId']) {
                     matchedTrial = trial;
+                    return true;
+                }
+            });
+            matchedTrial['controlArm'] = false;
+            matchedTrial['priority'] = 0; // highest priority
+            _.some(nctTrials, function(trial) {
+                if (key === trial['nctId']) {
+                    matchedTrial['interventions'] = trial['interventions'];
                     return true;
                 }
             });
@@ -283,9 +290,13 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                     matches: []
                 };
                 _.some(matchedTrial['treatmentList']['step'][0]['arm'], function(arm) {
-                    if ( aKey === arm[ 'arm_description' ] && arm[ 'drugs' ] ) {
-                        armMatch.drugs = _.map(arm[ 'drugs' ], 'name');
-                        hasArmDrug = true;
+                    if (aKey === arm['arm_description']) {
+                        if (arm['drugs']) {
+                            armMatch.drugs = _.map(arm[ 'drugs' ], 'name');
+                        }
+                        if (arm['arm_type'] === 'Control Arm') {
+                            matchedTrial['controlArm'] = true;
+                        }
                         return true;
                     }
                 });
@@ -345,23 +356,30 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         }
                     });
 
+                    if (clinicalGroupMatch.notMatches.length > 0) {
+                        if (clinicalGroupMatch.matches.length === 0) {
+                            matchedTrial['priority'] += 2;
+                        } else {
+                            matchedTrial['priority']++;
+                        }
+                    }
+
                     armMatch.matches.push(clinicalGroupMatch);
                 });
                 matchedTrial['matches'].push(armMatch);
             });
 
-            if (hasArmDrug) {
-                matchedTrial['interventions'] = [];
-            } else {
-                _.some(nctTrials, function(trial) {
-                    if (key === trial['nctId']) {
-                        matchedTrial['interventions'] = trial['interventions'];
-                        return true;
-                    }
-                });
-            }
-
             matchedTrials.push(matchedTrial);
+        });
+        // Put control arm in the bottom of matched results
+        matchedTrials.sort(function(a,b) {
+           if (a.controlArm) {
+               return 1; // b, a
+           } else if (b.controlArm) {
+               return -1; // a, b
+           } else {
+               return a.priority - b.priority;
+           }
         });
         return matchedTrials;
     }
