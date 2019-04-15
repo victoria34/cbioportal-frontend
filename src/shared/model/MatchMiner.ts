@@ -49,6 +49,7 @@ export interface IGenomicGroupMatch {
 
 export interface IArmMatch {
     armDescription: string | null;
+    controlArm: boolean;
     drugs: Array<string> | null;
     matches: Array<IClinicalGroupMatch>;
 }
@@ -66,6 +67,6 @@ export interface IDetailedTrialMatch {
     status: string;
     interventions: Array<string>;
     matches: Array<IArmMatch>;
-    controlArm: boolean;
+    hasControlArm: boolean;
     priority: number;
 }

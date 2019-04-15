@@ -516,7 +516,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                             )
                             }
                         </div>
-                        
+
                     </MSKTab>
 
 
@@ -553,6 +553,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                                              trialMatches={patientViewPageStore.trialMatches.result}
                                              trials={patientViewPageStore.matchMinerTrials.result}
                                              nctTrials={patientViewPageStore.nctTrials.result}
+                                             showControlArm={false}
                                              containerWidth={WindowStore.size.width-20}/>
                         </MSKTab>
                     )}

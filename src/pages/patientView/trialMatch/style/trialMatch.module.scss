@@ -3,6 +3,7 @@
 }
 .criteriaHr {
   margin:3px 0 3px 0 !important;
+  border-top-color: rgb(221, 221, 221) !important;
 }
 .diseasesUl {
    padding-left: 15px;
@@ -26,10 +27,15 @@
     flex: 1 1 auto;
     margin: 0 5px 0 0;
   }
+  .armRight {
+    flex: 0 0 auto;
+    width: 250px;
+  }
+
   .firstRight{
     display:flex;
     flex: 0 0 auto;
-    width: 250px;
+    width: 300px;
     justify-content: space-between;
 
     .secondLeft {
