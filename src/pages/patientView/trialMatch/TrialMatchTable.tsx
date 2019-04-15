@@ -18,6 +18,7 @@ export type ITrialMatchProps = {
     trialMatches:Array<ITrialMatch>;
     nctTrials:Array<INctTrial>;
     containerWidth: number;
+    showControlArm: boolean;
 }
 
 export type ITrialMatchState = {
@@ -40,20 +41,16 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
 
     constructor(props: ITrialMatchProps) {
         super(props);
-        if (props.sampleManager) {
-            this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials, props.sampleManager) };
-        } else {
-            this.state = { detailedTrialMatches: this.buildDetailedTrialMatches(props.trialMatches, props.trials, props.nctTrials) };
-        }
+        this.state = { detailedTrialMatches: this.buildDetailedTrialMatches()};
     }
 
     @computed
     get columnsWidth() {
         return {
             [ColumnKey.ID]: 0.1 * this.props.containerWidth,
-            [ColumnKey.TITLE]: 0.24 * this.props.containerWidth,
-            [ColumnKey.INTERVENTIONS]: 0.16 * this.props.containerWidth,
-            [ColumnKey.MATCHINGCRITERIA]: 0.5 * this.props.containerWidth
+            [ColumnKey.TITLE]: 0.3 * this.props.containerWidth,
+            // [ColumnKey.INTERVENTIONS]: 0.16 * this.props.containerWidth,
+            [ColumnKey.MATCHINGCRITERIA]: 0.6 * this.props.containerWidth
         };
     }
 
@@ -85,16 +82,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 {trial.matches.map((armMatch: any, index: number) => (
                     <div>
                         <div>
-                            <If condition={armMatch.armDescription !== 'null'}>
-                                <div className={styles.armDiv}>
-                                    <span><b>Arm: </b> {armMatch.armDescription}</span>
-                                </div>
-                            </If>
-                            <If condition={armMatch.drugs.length > 0}>
-                                <div className={styles.armDiv}>
-                                    <span><b>Drug: </b>{armMatch.drugs.join(', ')}</span>
-                                </div>
-                            </If>
                             <div>
                                 {armMatch.matches.map((clinicalGroupMatch: any, cgIndex:number) => (
                                     <span className={styles.criteriaContainer}>
@@ -191,6 +178,16 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                     </span>
                                 ))}
                             </div>
+                             <If condition={armMatch.armDescription !== 'null'}>
+                                <div className={styles.armDiv}>
+                                 <span>Arm: {armMatch.armDescription}</span>
+                                 </div>
+                            </If>
+                            <If condition={armMatch.drugs.length > 0}>
+                                <div className={styles.armDiv}>
+                                <span>Intervention: {armMatch.drugs.join(', ')}</span>
+                                </div>
+                            </If>
                         </div>
                         <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
                     </div>
@@ -199,20 +196,20 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         },
         sortBy:(trial: IDetailedTrialMatch) => (trial.matches[0].armDescription),
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
-    }, {
-        name: ColumnKey.INTERVENTIONS,
-        render: (trial: IDetailedTrialMatch) => (
-            <If condition={trial.interventions.length > 0}>
-                <ul className={styles.diseasesUl}>
-                    {trial.interventions.map((intervention: any) => (
-                        <li>{intervention}</li>
-                    ))}
-                </ul>
-            </If>
-        ),
-        sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
-        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
-        width: this.columnsWidth[ColumnKey.INTERVENTIONS]
+    // }, {
+    //     name: ColumnKey.INTERVENTIONS,
+    //     render: (trial: IDetailedTrialMatch) => (
+    //         <If condition={trial.interventions.length > 0}>
+    //             <ul className={styles.diseasesUl}>
+    //                 {trial.interventions.map((intervention: any) => (
+    //                     <li>{intervention}</li>
+    //                 ))}
+    //             </ul>
+    //         </If>
+    //     ),
+    //     sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+    //     // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+    //     width: this.columnsWidth[ColumnKey.INTERVENTIONS]
     }];
 
     public tooltipGenomicContent(data: Array<IGenomicGroupMatch>) {
@@ -259,35 +256,37 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         return hugoSymbolSet.size + ' genes' ;
     }
 
-    public buildDetailedTrialMatches(matches: Array<ITrialMatch>, trials: Array<ITrial>, nctTrials: Array<INctTrial>, sampleManager?: SampleManager) {
-        const groupedMatches = _.groupBy(matches, 'nctId');
+    public buildDetailedTrialMatches() {
+        const props = this.props;
+        const groupedMatches = _.groupBy(props.trialMatches, 'nctId');
         let matchedTrials: Array<IDetailedTrialMatch> = [];
         const trialIds = Object.keys(groupedMatches);
         _.forEach(trialIds, function (key) {
             let matchedTrial:any = {};
-            _.some(trials, function(trial) {
+            _.some(props.trials, function(trial) {
                 if (key === trial['nctId']) {
                     matchedTrial = trial;
                     return true;
                 }
             });
-            matchedTrial['controlArm'] = false;
+            matchedTrial['hasControlArm'] = false;
             matchedTrial['priority'] = 0; // highest priority
-            _.some(nctTrials, function(trial) {
-                if (key === trial['nctId']) {
-                    matchedTrial['interventions'] = trial['interventions'];
-                    return true;
-                }
-            });
+            // _.some(nctTrials, function(trial) {
+            //     if (key === trial['nctId']) {
+            //         matchedTrial['interventions'] = trial['interventions'];
+            //         return true;
+            //     }
+            // });
 
             matchedTrial['matches'] = [];
             const groupByArm = _.groupBy(groupedMatches[key], 'armDescription');
-            const aKeys = Object.keys(groupByArm).sort();
+            const aKeys = Object.keys(groupByArm);
             _.forEach(aKeys, function(aKey) {
                 let armMatch: IArmMatch = {
                     armDescription: aKey,
                     drugs: [],
-                    matches: []
+                    matches: [],
+                    controlArm: false
                 };
                 _.some(matchedTrial['treatmentList']['step'][0]['arm'], function(arm) {
                     if (aKey === arm['arm_description']) {
@@ -295,7 +294,8 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                             armMatch.drugs = _.map(arm[ 'drugs' ], 'name');
                         }
                         if (arm['arm_type'] === 'Control Arm') {
-                            matchedTrial['controlArm'] = true;
+                            armMatch.controlArm = true;
+                            matchedTrial['hasControlArm'] = true;
                         }
                         return true;
                     }
@@ -338,8 +338,8 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                                 sampleIds: []
                             };
                             const sampleIds = _.uniq(_.map(groupByPatientGenomic[pgKey], 'sampleId'));
-                            if (sampleIds.length > 1 && sampleManager) {
-                                sampleManager.samples.map((item:any) => {
+                            if (sampleIds.length > 1 && props.sampleManager) {
+                                props.sampleManager.samples.map((item:any) => {
                                     if (sampleIds.includes(item.id)) {
                                         genomicMatch.sampleIds.push(item.id);
                                     }
@@ -371,17 +371,46 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
 
             matchedTrials.push(matchedTrial);
         });
-        // Put control arm in the bottom of matched results
-        matchedTrials.sort(function(a,b) {
-           if (a.controlArm) {
-               return 1; // b, a
-           } else if (b.controlArm) {
-               return -1; // a, b
-           } else {
-               return a.priority - b.priority;
-           }
-        });
+
+        if (props.showControlArm) {
+            // Put control arm in the bottom of matched results
+            matchedTrials.sort(function(a,b) {
+                if (a.hasControlArm) {
+                    return 1; // b, a
+                } else if (b.hasControlArm) {
+                    return -1; // a, b
+                } else {
+                    return a.priority - b.priority;
+                }
+            });
+        } else {
+            this.removeControlArm(matchedTrials);
+            matchedTrials.sort(function(a,b) {
+                return a.priority - b.priority;
+            });
+        }
+
         return matchedTrials;
+    }
+
+    public removeControlArm(trials: Array<IDetailedTrialMatch>) {
+        _.map(trials, function(trial: IDetailedTrialMatch, tIndex: number){
+            if (trial && trial.hasControlArm) {
+                if (trial.matches.length === 1) {
+                    trials.splice(tIndex, 1);
+                } else {
+                    _.map(trial.matches, function(armMatch: IArmMatch, aIndex: number){
+                        if(armMatch.controlArm) {
+                            trial.matches.splice(aIndex, 1);
+                        }
+                    });
+                    if (trial.matches.length === 0) {
+                        trials.splice(tIndex, 1);
+                    }
+                }
+
+            }
+        });
     }
 
     render() {
