@@ -33,25 +33,15 @@ export interface IGenomicMatch {
     sampleIds: Array<string>;
 }
 
-export interface IClinicalGroupMatch {
-    trialAgeNumerical: string;
-    trialOncotreePrimaryDiagnosis: {
-        general: Array<string>,
-        not: Array<string>
-    };
-    matches: Array<IGenomicGroupMatch>;
-    notMatches: Array<IGenomicGroupMatch>;
-}
-export interface IGenomicGroupMatch {
-    genomicAlteration: string;
-    matches: Array<IGenomicMatch>;
+export interface ICancerTypeMatch {
+    general: Array<string>;
+    not: Array<string>;
 }
 
-export interface IArmMatch {
-    armDescription: string | null;
-    controlArm: boolean;
-    drugs: Array<string> | null;
-    matches: Array<IClinicalGroupMatch>;
+export interface IGenomicTypeMatch {
+    genomicAlteration: string;
+    matches: Array<IGenomicMatch>;
+    type: string;
 }
 
 export interface INctTrial {
@@ -59,14 +49,15 @@ export interface INctTrial {
     interventions: Array<string>;
 }
 
-export interface IDetailedTrialMatch {
+export interface IFlattenTrialMatch {
     nctId: string;
-    protocolNo: string | null;
-    phase: string;
+    protocolNo: string;
     shortTitle: string;
     status: string;
-    interventions: Array<string>;
-    matches: Array<IArmMatch>;
-    hasControlArm: boolean;
+    armDescriptions: Array<string>;
+    genomics: Array<IGenomicTypeMatch | any>;
+    ages: Array<string>;
+    cancerTypes: Array<ICancerTypeMatch>;
+    interventions: Array<Array<string>>;
     priority: number;
 }

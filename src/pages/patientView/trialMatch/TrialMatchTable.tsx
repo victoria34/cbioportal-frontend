@@ -3,8 +3,7 @@ import { If, Then, Else } from 'react-if';
 import * as _ from 'lodash';
 import {observer} from "mobx-react";
 import {
-    IClinicalGroupMatch, IGenomicGroupMatch, IGenomicMatch, INctTrial, ITrial,
-    ITrialMatch, IDetailedTrialMatch, IArmMatch
+    IGenomicMatch, INctTrial, ITrial, ITrialMatch, IFlattenTrialMatch, IGenomicTypeMatch
 } from "../../../shared/model/MatchMiner";
 import styles from './style/trialMatch.module.scss';
 import { computed } from "mobx";
@@ -22,17 +21,20 @@ export type ITrialMatchProps = {
 }
 
 export type ITrialMatchState = {
-    detailedTrialMatches: Array<IDetailedTrialMatch>;
+    flattenTrialMatches: Array<IFlattenTrialMatch>;
 }
 
 enum ColumnKey {
     ID = 'ID',
     TITLE = 'Title',
     INTERVENTIONS = 'Interventions',
-    MATCHINGCRITERIA = 'Matching Criteria'
+    AGE = 'Age',
+    CANCERTYPE = 'Cancer Type',
+    GENOMIC = 'Genomic',
+    ARM = 'Arm'
 }
 
-class TrialMatchTableComponent extends LazyMobXTable<IDetailedTrialMatch> {
+class TrialMatchTableComponent extends LazyMobXTable<IFlattenTrialMatch> {
 
 }
 
@@ -41,184 +43,223 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
 
     constructor(props: ITrialMatchProps) {
         super(props);
-        this.state = { detailedTrialMatches: this.buildDetailedTrialMatches()};
+        this.state = { flattenTrialMatches: this.flattenTrialMatches()};
     }
 
     @computed
     get columnsWidth() {
         return {
             [ColumnKey.ID]: 0.1 * this.props.containerWidth,
-            [ColumnKey.TITLE]: 0.3 * this.props.containerWidth,
-            // [ColumnKey.INTERVENTIONS]: 0.16 * this.props.containerWidth,
-            [ColumnKey.MATCHINGCRITERIA]: 0.6 * this.props.containerWidth
+            [ColumnKey.TITLE]: 0.2 * this.props.containerWidth,
+            [ColumnKey.ARM]: 0.15 * this.props.containerWidth,
+            [ColumnKey.AGE]: 0.05 * this.props.containerWidth,
+            [ColumnKey.CANCERTYPE]: 0.15 * this.props.containerWidth,
+            [ColumnKey.GENOMIC]: 0.25 * this.props.containerWidth,
+            [ColumnKey.INTERVENTIONS]: 0.1 * this.props.containerWidth,
         };
     }
 
     private _columns = [{
         name: ColumnKey.ID,
-        render: (trial: IDetailedTrialMatch) => (
+        render: (trial: IFlattenTrialMatch) => (
             <div>
                 <span><a target="_blank" href={"https://www.mskcc.org/cancer-care/clinical-trials/" + trial.protocolNo}>{trial.protocolNo}</a></span><br/>
                 <span><a target="_blank" href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></span><br/>
                 <span>{trial.status}</span>
             </div>
         ),
-        sortBy:(trial: IDetailedTrialMatch) => (trial.protocolNo),
+        sortBy:(trial: IFlattenTrialMatch) => (trial.protocolNo),
         // download: (trial: IDetailedTrialMatch) => (trial.protocolNo + ', ' + trial.nctId + ', ' + trial.status),
         width: this.columnsWidth[ColumnKey.ID]
     }, {
         name: ColumnKey.TITLE,
-        render: (trial: IDetailedTrialMatch) => (
+        render: (trial: IFlattenTrialMatch) => (
                 <span>{trial.shortTitle}</span>
         ),
-        sortBy:(trial: IDetailedTrialMatch) => (trial.shortTitle),
+        sortBy:(trial: IFlattenTrialMatch) => (trial.shortTitle),
         // download:(trial: IDetailedTrialMatch) => (trial.shortTitle),
         width: this.columnsWidth[ColumnKey.TITLE]
     }, {
-        name: ColumnKey.MATCHINGCRITERIA,
-        render: (trial: IDetailedTrialMatch) => {
+        name: ColumnKey.ARM,
+        render: (trial: IFlattenTrialMatch) => (
+            <div>
+                {trial.armDescriptions.map((description: any, index: number) => (
+                    <div>
+                        <span>{description}</span>
+                        <If condition={index < trial.armDescriptions.length - 1}>
+                            <hr className={styles.criteriaHr}/>
+                        </If>
+                    </div>
+                ) )}
+            </div>
+        ),
+        // sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+        width: this.columnsWidth[ColumnKey.ARM]
+    }, {
+        name: ColumnKey.GENOMIC,
+        render: (trial: IFlattenTrialMatch) => {
             const props = this.props;
             return <div>
-                {trial.matches.map((armMatch: any, index: number) => (
+                {trial.genomics.map( ( genomicGroupMatch: any, index: number ) => (
                     <div>
-                        <div>
+                        { genomicGroupMatch.type === 'general' ? (
                             <div>
-                                {armMatch.matches.map((clinicalGroupMatch: any, cgIndex:number) => (
-                                    <span className={styles.criteriaContainer}>
-                                        <span className={styles.firstLeft}>
-                                            {clinicalGroupMatch.matches.map((genomicGroupMatch: any) => (
-                                                <If condition={genomicGroupMatch.matches.length === 1 &&
-                                                genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange}>
+                                <If condition={genomicGroupMatch.matches.length === 1 &&
+                                genomicGroupMatch.genomicAlteration === genomicGroupMatch.matches[ 0 ].trueHugoSymbol + ' ' + genomicGroupMatch.matches[ 0 ].trueProteinChange}>
+                                    <Then>
+                                        <span>{genomicGroupMatch.genomicAlteration + ' '}
+                                            {genomicGroupMatch.matches[ 0 ].sampleIds.map( ( sampleId: string ) => (
+                                                <span className={styles.genomicSpan}>
+                                                    {props.sampleManager!.getComponentForSample( sampleId, 1, '' )}
+                                                </span>
+                                            ) )}
+                                        </span>
+                                    </Then>
+                                    <Else>
+                                        <div>
+                                            <span className={styles.genomicSpan + styles.firstLeft}>
+                                                {genomicGroupMatch.genomicAlteration + ': '}
+                                                <If condition={genomicGroupMatch.matches.length > 1}>
                                                     <Then>
-                                                        <div>
-                                                            <span>{genomicGroupMatch.genomicAlteration + ' '}
-                                                                {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                                                        <ul className={styles.alterationUl}>
+                                                        {genomicGroupMatch.matches.map( ( genomicMatch: any) => (
+                                                            <li>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
+                                                                {genomicMatch.sampleIds.map( ( sampleId: string ) => (
                                                                     <span className={styles.genomicSpan}>
-                                                                        {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
+                                                                        {props.sampleManager!.getComponentForSample( sampleId, 1, '' )}
                                                                     </span>
-                                                                ))}
-                                                            </span>
-                                                        </div>
+                                                                ) )}
+                                                            </li>
+                                                        ) )}
+                                                        </ul>
                                                     </Then>
                                                     <Else>
-                                                        <div>
-                                                            <span className={styles.genomicSpan + styles.firstLeft}>
-                                                                {genomicGroupMatch.genomicAlteration + ': '}
-                                                                <If condition={genomicGroupMatch.matches.length > 1}>
-                                                                    <Then>
-                                                                        <ul className={styles.alterationUl}>
-                                                                        {genomicGroupMatch.matches.map((genomicMatch: any) => (
-                                                                            <li>{genomicMatch.trueHugoSymbol + ' ' + genomicMatch.trueProteinChange + ' '}
-                                                                                {genomicMatch.sampleIds.map((sampleId: string) => (
-                                                                                    <span className={styles.genomicSpan}>
-                                                                                        {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                                    </span>
-                                                                                ))}
-                                                                            </li>
-                                                                        ))}
-                                                                        </ul>
-                                                                    </Then>
-                                                                    <Else>
-                                                                        <span>{genomicGroupMatch.matches[0].trueHugoSymbol + ' ' + genomicGroupMatch.matches[0].trueProteinChange + ' '}
-                                                                            {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
-                                                                                <span className={styles.genomicSpan}>
-                                                                                    {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
-                                                                                </span>
-                                                                            ))}
-                                                                        </span>
-                                                                    </Else>
-                                                                </If>
-                                                            </span>
-                                                        </div>
+                                                        <span>{genomicGroupMatch.matches[ 0 ].trueHugoSymbol + ' ' + genomicGroupMatch.matches[ 0 ].trueProteinChange + ' '}
+                                                            {genomicGroupMatch.matches[ 0 ].sampleIds.map( ( sampleId: string ) => (
+                                                                <span className={styles.genomicSpan}>
+                                                                    {props.sampleManager!.getComponentForSample( sampleId, 1, '' )}
+                                                                </span>
+                                                            ) )}
+                                                        </span>
                                                     </Else>
                                                 </If>
-                                            ))}
-                                            <If condition={clinicalGroupMatch.notMatches.length > 0}>
-                                                <DefaultTooltip
-                                                    placement='bottomLeft'
-                                                    trigger={['hover', 'focus']}
-                                                    overlay={this.tooltipGenomicContent(clinicalGroupMatch.notMatches)}
-                                                    arrowContent={<div className="rc-tooltip-arrow-inner" />}
-                                                    destroyTooltipOnHide={false}
-                                                    onPopupAlign={placeArrowBottomLeft}
-                                                >
-                                                    {this.mainContent('No alterations in ' + this.getHugoSymbolName(clinicalGroupMatch.notMatches, 3) + ' defined by the trial')}
-                                                </DefaultTooltip>
-                                            </If>
-                                        </span>
-                                        <span className={styles.firstRight}>
-                                            <span className={styles.secondLeft}>{clinicalGroupMatch.trialAgeNumerical + ' yrs old'}</span>
-                                            <span className={styles.secondRight}>
-                                                {clinicalGroupMatch.trialOncotreePrimaryDiagnosis.general.join(', ')}
-                                                <If condition={clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.length > 0}>
-                                                    <span>
-                                                        <b> except in </b>
-                                                        <If condition={clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.length < 4}>
-                                                            <Then>
-                                                                {clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.join(', ').replace(/,(?!.*,)/gmi, ' and')}
-                                                            </Then>
-                                                            <Else>
-                                                                <DefaultTooltip
-                                                                    placement='bottomLeft'
-                                                                    trigger={['hover', 'focus']}
-                                                                    overlay={this.tooltipClinicalContent(clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not)}
-                                                                    arrowContent={<div className="rc-tooltip-arrow-inner" />}
-                                                                    destroyTooltipOnHide={false}
-                                                                    onPopupAlign={placeArrowBottomLeft}
-                                                                >
-                                                                    {this.mainContent(clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not.length + ' cancer types')}
-                                                                </DefaultTooltip>
-                                                            </Else>
-                                                        </If>
-                                                    </span>
-                                                </If>
                                             </span>
-                                        </span>
-                                    <If condition={cgIndex < armMatch.matches.length - 1}><hr className={styles.criteriaHr}/></If>
-                                    </span>
-                                ))}
+                                        </div>
+                                    </Else>
+                                </If>
                             </div>
-                             <If condition={armMatch.armDescription !== 'null'}>
-                                <div className={styles.armDiv}>
-                                 <span>Arm: {armMatch.armDescription}</span>
-                                 </div>
-                            </If>
-                            <If condition={armMatch.drugs.length > 0}>
-                                <div className={styles.armDiv}>
-                                <span>Intervention: {armMatch.drugs.join(', ')}</span>
-                                </div>
-                            </If>
-                        </div>
-                        <If condition={index < trial.matches.length - 1}><hr className={styles.criteriaHr}/></If>
+                        ) : (
+                            <div>
+                                <If condition={genomicGroupMatch.matches.length > 0}>
+                                    <DefaultTooltip
+                                        placement='bottomLeft'
+                                        trigger={[ 'hover', 'focus' ]}
+                                        overlay={this.tooltipGenomicContent( genomicGroupMatch.matches )}
+                                        arrowContent={<div className="rc-tooltip-arrow-inner"/>}
+                                        destroyTooltipOnHide={false}
+                                        onPopupAlign={placeArrowBottomLeft}
+                                    >
+                                        {this.mainContent( 'No alterations in ' + this.getHugoSymbolName(  genomicGroupMatch.matches, 3 ) + ' defined by the trial' )}
+                                    </DefaultTooltip>
+                                </If>
+                            </div>
+                        )}
+                        <If condition={index < trial.armDescriptions.length - 1}>
+                            <hr className={styles.criteriaHr}/>
+                        </If>
+                    </div>
+                ) )}
+            </div>
+        },
+        // sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+        width: this.columnsWidth[ColumnKey.GENOMIC]
+    }, {
+        name: ColumnKey.AGE,
+        render: (trial: IFlattenTrialMatch) => (
+            <div>
+                {trial.ages.map((age: any, index: number) => (
+                    <div>
+                        <span>{age}</span>
+                        <If condition={index < trial.armDescriptions.length - 1}>
+                            <hr className={styles.criteriaHr}/>
+                        </If>
                     </div>
                 ))}
-                </div>
-        },
-        sortBy:(trial: IDetailedTrialMatch) => (trial.matches[0].armDescription),
-        width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
-    // }, {
-    //     name: ColumnKey.INTERVENTIONS,
-    //     render: (trial: IDetailedTrialMatch) => (
-    //         <If condition={trial.interventions.length > 0}>
-    //             <ul className={styles.diseasesUl}>
-    //                 {trial.interventions.map((intervention: any) => (
-    //                     <li>{intervention}</li>
-    //                 ))}
-    //             </ul>
-    //         </If>
-    //     ),
-    //     sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
-    //     // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
-    //     width: this.columnsWidth[ColumnKey.INTERVENTIONS]
+            </div>
+        ),
+        // sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+        width: this.columnsWidth[ColumnKey.AGE]
+    }, {
+        name: ColumnKey.CANCERTYPE,
+        render: (trial: IFlattenTrialMatch) => (
+            <div>
+                {trial.cancerTypes.map((cancerType: any, index: number) => (
+                    <div>
+                        <span>
+                            {cancerType.general.join(', ')}
+                            <If condition={cancerType.not.length > 0}>
+                                <span>
+                                    <b> except in </b>
+                                    <If condition={cancerType.not.length < 4}>
+                                        <Then>
+                                            {cancerType.not.join(', ').replace(/,(?!.*,)/gmi, ' and')}
+                                        </Then>
+                                        <Else>
+                                            <DefaultTooltip
+                                                placement='bottomLeft'
+                                                trigger={['hover', 'focus']}
+                                                overlay={this.tooltipClinicalContent(cancerType.not)}
+                                                arrowContent={<div className="rc-tooltip-arrow-inner" />}
+                                                destroyTooltipOnHide={false}
+                                                onPopupAlign={placeArrowBottomLeft}
+                                            >
+                                                {this.mainContent(cancerType.not.length + ' cancer types')}
+                                            </DefaultTooltip>
+                                        </Else>
+                                    </If>
+                                </span>
+                            </If>
+                        </span>
+                        <If condition={index < trial.armDescriptions.length - 1}><hr className={styles.criteriaHr}/></If>
+                    </div>
+                ))}
+            </div>
+        ),
+        // sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+        width: this.columnsWidth[ColumnKey.CANCERTYPE]
+    }, {
+        name: ColumnKey.INTERVENTIONS,
+        render: (trial: IFlattenTrialMatch) => (
+            <div>
+                {trial.interventions.map((interventions: any, index: number) => (
+                    <div>
+                        <If condition={interventions.length > 0}>
+                            <span>
+                                {interventions.map((intervention: any) => (
+                                    <span>{intervention}</span>
+                                ))}
+                                <If condition={index < trial.armDescriptions.length - 1}><hr className={styles.criteriaHr}/></If>
+                            </span>
+                        </If>
+                    </div>
+                ))}
+            </div>
+        ),
+        // sortBy:(trial: IDetailedTrialMatch) => (trial.interventions[0]),
+        // download: (trial: IDetailedTrialMatch) => (trial.interventions.join(', ')),
+        width: this.columnsWidth[ColumnKey.INTERVENTIONS]
     }];
-
-    public tooltipGenomicContent(data: Array<IGenomicGroupMatch>) {
+    public tooltipGenomicContent(data: Array<IGenomicTypeMatch>) {
         const props = this.props;
         return (
             <div style={{ maxHeight:400, maxWidth:600, overflow:'auto' }}>
-                {data.map((genomicGroupMatch: any) => (
-                    <div className={styles.genomicSpan}><b>Not </b>{genomicGroupMatch.genomicAlteration.replace(/!/g, '') + ' '}
-                        {genomicGroupMatch.matches[0].sampleIds.map((sampleId: string) => (
+                {data.map((genomicTypeMatch: any) => (
+                    <div className={styles.genomicSpan}><b>Not </b>{genomicTypeMatch.genomicAlteration.replace(/!/g, '') + ' '}
+                        {genomicTypeMatch.matches[0].sampleIds.map((sampleId: string) => (
                             <span className={styles.genomicSpan}>
                                 {props.sampleManager!.getComponentForSample(sampleId, 1, '')}
                             </span>
@@ -248,7 +289,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         );
     }
 
-    public getHugoSymbolName(matches: Array<IGenomicGroupMatch>, threshold: number) {
+    public getHugoSymbolName(matches: Array<IGenomicTypeMatch>, threshold: number) {
         const hugoSymbolSet = new Set([...matches].map(x => x.genomicAlteration.split(' ')[0].slice(1)));
         if (hugoSymbolSet.size <= threshold) {
             return [...hugoSymbolSet].join(', ');
@@ -256,167 +297,137 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         return hugoSymbolSet.size + ' genes' ;
     }
 
-    public buildDetailedTrialMatches() {
-        const props = this.props;
-        const groupedMatches = _.groupBy(props.trialMatches, 'nctId');
-        let matchedTrials: Array<IDetailedTrialMatch> = [];
+    public flattenTrialMatches() {
+        const self = this;
+        const groupedMatches = _.groupBy(self.props.trialMatches, 'nctId');
+        let matchedTrials: Array<IFlattenTrialMatch> = [];
         const trialIds = Object.keys(groupedMatches);
-        _.forEach(trialIds, function (key) {
-            let matchedTrial:any = {};
-            _.some(props.trials, function(trial) {
-                if (key === trial['nctId']) {
-                    matchedTrial = trial;
-                    return true;
+        _.forEach(trialIds, function (trialId) {
+            let trial: any = _.find( self.props.trials, { 'nctId': trialId } );
+            let matchedTrial: IFlattenTrialMatch = {
+                nctId: trial.nctId,
+                protocolNo: trial.protocolNo,
+                shortTitle: trial.shortTitle,
+                status: trial.status,
+                armDescriptions: [],
+                genomics: [],
+                ages: [],
+                cancerTypes:[],
+                interventions: [],
+                priority: 0 // highest priority
+            };
+            const groupByArm = _.groupBy(groupedMatches[trialId], 'armDescription');
+            const armDescriptions = Object.keys( groupByArm );
+            _.forEach(armDescriptions, function(armDescription) {
+                if ( armDescription !== 'null' ) { // match for specific arm
+                    const matchedArm = _.find( trial['treatmentList']['step'][0]['arm'], { 'arm_description': armDescription } );
+                    if (matchedArm['arm_type'] !== 'Control Arm') {
+                        if ( matchedArm[ 'drugs' ] ) {
+                            matchedTrial.interventions.push( _.map( matchedArm[ 'drugs' ], 'name' ));
+                        }
+                        matchedTrial.armDescriptions.push(armDescription);
+                        self.getMatchDetails(matchedTrial, groupByArm, armDescription);
+                    }
+                } else {
+                    self.getMatchDetails(matchedTrial, groupByArm, armDescription);
                 }
-            });
-            matchedTrial['hasControlArm'] = false;
-            matchedTrial['priority'] = 0; // highest priority
-            // _.some(nctTrials, function(trial) {
-            //     if (key === trial['nctId']) {
-            //         matchedTrial['interventions'] = trial['interventions'];
-            //         return true;
-            //     }
-            // });
-
-            matchedTrial['matches'] = [];
-            const groupByArm = _.groupBy(groupedMatches[key], 'armDescription');
-            const aKeys = Object.keys(groupByArm);
-            _.forEach(aKeys, function(aKey) {
-                let armMatch: IArmMatch = {
-                    armDescription: aKey,
-                    drugs: [],
-                    matches: [],
-                    controlArm: false
-                };
-                _.some(matchedTrial['treatmentList']['step'][0]['arm'], function(arm) {
-                    if (aKey === arm['arm_description']) {
-                        if (arm['drugs']) {
-                            armMatch.drugs = _.map(arm[ 'drugs' ], 'name');
-                        }
-                        if (arm['arm_type'] === 'Control Arm') {
-                            armMatch.controlArm = true;
-                            matchedTrial['hasControlArm'] = true;
-                        }
-                        return true;
-                    }
-                });
-                const groupByAge = _.groupBy(groupByArm[aKey], 'trialAgeNumerical');
-                const ageKeys = Object.keys(groupByAge);
-                _.forEach(ageKeys, function(ageKey) {
-                    const cancerTypes =  _.uniq(_.map(groupByAge[ageKey], 'trialOncotreePrimaryDiagnosis'));
-                    let generalCancerTypes: Array<string> = [];
-                    let notCancerTypes: Array<string> = [];
-                    _.map(cancerTypes, function(item) {
-                       if (item.indexOf('!') !== -1) {
-                           notCancerTypes.push(item.replace(/!/g, ''));
-                       } else {
-                           generalCancerTypes.push(item);
-                       }
-                    });
-                    let clinicalGroupMatch: IClinicalGroupMatch = {
-                        trialAgeNumerical: ageKey,
-                        trialOncotreePrimaryDiagnosis: {
-                            general: generalCancerTypes,
-                            not: notCancerTypes
-                        },
-                        matches: [],
-                        notMatches: []
-                    };
-                    const groupByGenomicAlteration = _.groupBy(groupByAge[ageKey], 'genomicAlteration');
-                    const gaKeys = Object.keys(groupByGenomicAlteration).sort();
-                    _.forEach(gaKeys, function(gaKey) {
-                        const groupByPatientGenomic = _.groupBy(groupByGenomicAlteration[gaKey], 'patientGenomic');
-                        const pgKeys = Object.keys(groupByPatientGenomic);
-                        let genomicGroupMatch: IGenomicGroupMatch = {
-                            genomicAlteration: gaKey,
-                            matches: []
-                        };
-                        _.forEach(pgKeys, function(pgKey) {
-                            let genomicMatch: IGenomicMatch = {
-                                trueHugoSymbol: groupByPatientGenomic[pgKey][0].trueHugoSymbol,
-                                trueProteinChange: groupByPatientGenomic[pgKey][0].trueProteinChange,
-                                sampleIds: []
-                            };
-                            const sampleIds = _.uniq(_.map(groupByPatientGenomic[pgKey], 'sampleId'));
-                            if (sampleIds.length > 1 && props.sampleManager) {
-                                props.sampleManager.samples.map((item:any) => {
-                                    if (sampleIds.includes(item.id)) {
-                                        genomicMatch.sampleIds.push(item.id);
-                                    }
-                                });
-                            } else {
-                                genomicMatch.sampleIds = sampleIds;
-                            }
-                            genomicGroupMatch.matches.push(genomicMatch);
-                        });
-                        if(gaKey.includes('!')) {
-                            clinicalGroupMatch.notMatches.push(genomicGroupMatch);
-                        } else {
-                            clinicalGroupMatch.matches.push(genomicGroupMatch);
-                        }
-                    });
-
-                    if (clinicalGroupMatch.notMatches.length > 0) {
-                        if (clinicalGroupMatch.matches.length === 0) {
-                            matchedTrial['priority'] += 2;
-                        } else {
-                            matchedTrial['priority']++;
-                        }
-                    }
-
-                    armMatch.matches.push(clinicalGroupMatch);
-                });
-                matchedTrial['matches'].push(armMatch);
             });
 
             matchedTrials.push(matchedTrial);
         });
-
-        if (props.showControlArm) {
-            // Put control arm in the bottom of matched results
-            matchedTrials.sort(function(a,b) {
-                if (a.hasControlArm) {
-                    return 1; // b, a
-                } else if (b.hasControlArm) {
-                    return -1; // a, b
-                } else {
-                    return a.priority - b.priority;
-                }
-            });
-        } else {
-            this.removeControlArm(matchedTrials);
-            matchedTrials.sort(function(a,b) {
-                return a.priority - b.priority;
-            });
-        }
+        matchedTrials.sort(function(a,b) {
+            return a.priority - b.priority;
+        });
 
         return matchedTrials;
     }
 
-    public removeControlArm(trials: Array<IDetailedTrialMatch>) {
-        _.map(trials, function(trial: IDetailedTrialMatch, tIndex: number){
-            if (trial && trial.hasControlArm) {
-                if (trial.matches.length === 1) {
-                    trials.splice(tIndex, 1);
+    public getMatchDetails(matchedTrial: any, groupByArm: any, armDescription: string) {
+        const props = this.props;
+        const groupByAge = _.groupBy( groupByArm[ armDescription ], 'trialAgeNumerical' );
+        const ages = Object.keys( groupByAge );
+        _.forEach( ages, function( age ) {
+            const cancerTypes = _.uniq( _.map( groupByAge[ age ], 'trialOncotreePrimaryDiagnosis' ) );
+            let generalCancerTypes: Array<string> = [];
+            let notCancerTypes: Array<string> = [];
+            _.map( cancerTypes, function( item ) {
+                if ( item.indexOf( '!' ) !== - 1 ) {
+                    notCancerTypes.push( item.replace( /!/g, '' ) );
                 } else {
-                    _.map(trial.matches, function(armMatch: IArmMatch, aIndex: number){
-                        if(armMatch.controlArm) {
-                            trial.matches.splice(aIndex, 1);
-                        }
-                    });
-                    if (trial.matches.length === 0) {
-                        trials.splice(tIndex, 1);
-                    }
+                    generalCancerTypes.push( item );
                 }
-
+            } );
+            if (age === 'null') {
+                matchedTrial.ages.push( '' );
+            } else {
+                matchedTrial.ages.push( age );
             }
-        });
+
+            matchedTrial.cancerTypes.push( {
+                general: generalCancerTypes,
+                not: notCancerTypes
+            } );
+            let matches: Array<IGenomicTypeMatch> = [];
+            let notMatches: Array<IGenomicTypeMatch> = [];
+            const groupByGenomicAlteration = _.groupBy( groupByAge[ age ], 'genomicAlteration' );
+            const genomicAlterations = Object.keys( groupByGenomicAlteration );
+            _.forEach( genomicAlterations, function( genomicAlteration ) {
+                const groupByPatientGenomic = _.groupBy( groupByGenomicAlteration[ genomicAlteration ], 'patientGenomic' );
+                const patientGenomics = Object.keys( groupByPatientGenomic );
+                let genomicTypeMatch: IGenomicTypeMatch = {
+                    genomicAlteration: genomicAlteration,
+                    matches: [],
+                    type: ''
+                };
+                _.forEach( patientGenomics, function( patientGenomic ) {
+                    let genomicMatch: IGenomicMatch = {
+                        trueHugoSymbol: groupByPatientGenomic[ patientGenomic ][ 0 ].trueHugoSymbol,
+                        trueProteinChange: groupByPatientGenomic[ patientGenomic ][ 0 ].trueProteinChange,
+                        sampleIds: []
+                    };
+                    const sampleIds = _.uniq( _.map( groupByPatientGenomic[ patientGenomic ], 'sampleId' ) );
+                    if ( sampleIds.length > 1 && props.sampleManager ) {
+                        props.sampleManager.samples.map( ( item: any ) => {
+                            if ( sampleIds.includes( item.id ) ) {
+                                genomicMatch.sampleIds.push( item.id );
+                            }
+                        } );
+                    } else {
+                        genomicMatch.sampleIds = sampleIds;
+                    }
+                    genomicTypeMatch.matches.push( genomicMatch );
+                } );
+                if ( genomicAlteration.includes( '!' ) ) {
+                    genomicTypeMatch.type = 'not';
+                    notMatches.push( genomicTypeMatch );
+                } else {
+                    genomicTypeMatch.type = 'general';
+                    matches.push( genomicTypeMatch );
+                }
+            } );
+            if ( matches.length > 0 ) {
+                matchedTrial.genomics = _.concat(matchedTrial.genomics, matches);
+            }
+            if ( notMatches.length > 0 ) {
+                // Group all not matches together as an object
+                matchedTrial.genomics.push( {
+                    genomicAlteration: '',
+                    matches: notMatches,
+                    type: 'not'
+                } );
+                if ( matches.length === 0 ) {
+                    matchedTrial.priority += 2;
+                } else {
+                    matchedTrial.priority ++;
+                }
+            }
+        } );
     }
 
     render() {
         return (
             <TrialMatchTableComponent
-                data={this.state.detailedTrialMatches}
+                data={this.state.flattenTrialMatches}
                 columns={this._columns}
                 showCopyDownload={false}
             />
