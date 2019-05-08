@@ -45,9 +45,9 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
     @computed
     get columnsWidth() {
         return {
-            [ColumnKey.ID]: 0.1 * this.props.containerWidth,
-            [ColumnKey.TITLE]: 0.3 * this.props.containerWidth,
-            [ColumnKey.MATCHINGCRITERIA]: 0.6 * this.props.containerWidth
+            [ColumnKey.ID]: 140,
+            [ColumnKey.TITLE]: 0.35 * (this.props.containerWidth - 140),
+            [ColumnKey.MATCHINGCRITERIA]: 0.65 * (this.props.containerWidth - 140)
         };
     }
 
@@ -55,13 +55,12 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         name: ColumnKey.ID,
         render: (trial: IDetailedTrialMatch) => (
             <div>
-                <span><a target="_blank" href={"https://www.mskcc.org/cancer-care/clinical-trials/" + trial.protocolNo}>{trial.protocolNo}</a></span><br/>
-                <span><a target="_blank" href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></span><br/>
-                <span>{trial.status}</span>
+                <div><a target="_blank" href={"https://www.mskcc.org/cancer-care/clinical-trials/" + trial.protocolNo}>{trial.protocolNo}</a></div>
+                <div><a target="_blank" href={"https://clinicaltrials.gov/ct2/show/" + trial.nctId}>{trial.nctId}</a></div>
+                <div>{trial.status}</div>
             </div>
         ),
         sortBy:(trial: IDetailedTrialMatch) => (trial.protocolNo),
-        // download: (trial: IDetailedTrialMatch) => (trial.protocolNo + ', ' + trial.nctId + ', ' + trial.status),
         width: this.columnsWidth[ColumnKey.ID]
     }, {
         name: ColumnKey.TITLE,
@@ -69,7 +68,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 <span>{trial.shortTitle}</span>
         ),
         sortBy:(trial: IDetailedTrialMatch) => (trial.shortTitle),
-        // download:(trial: IDetailedTrialMatch) => (trial.shortTitle),
         width: this.columnsWidth[ColumnKey.TITLE]
     }, {
         name: ColumnKey.MATCHINGCRITERIA,
@@ -177,12 +175,12 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                             </div>
                              <If condition={armMatch.armDescription !== 'null'}>
                                 <div className={styles.armDiv}>
-                                 <span>Arm: {armMatch.armDescription}</span>
-                                 </div>
+                                    <span>Arm: {armMatch.armDescription}</span>
+                                </div>
                             </If>
                             <If condition={armMatch.drugs.length > 0}>
                                 <div className={styles.armDiv}>
-                                <span>Intervention: {armMatch.drugs.join(', ')}</span>
+                                    <span>Intervention: {armMatch.drugs.join(', ')}</span>
                                 </div>
                             </If>
                         </div>
@@ -191,7 +189,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                 ))}
                 </div>
         },
-        sortBy:(trial: IDetailedTrialMatch) => (trial.matches[0].armDescription),
         width: this.columnsWidth[ColumnKey.MATCHINGCRITERIA]
     }];
 
@@ -243,15 +240,13 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
         const props = this.props;
         const groupByTrialId = _.groupBy(props.trialMatches, 'nctId');
         let matchedTrials: Array<IDetailedTrialMatch> = [];
-        const trialIds = Object.keys(groupByTrialId);
         const hiddenArmTypes = ['Control Arm', 'Placebo Arm'];
-        _.forEach(trialIds, function (trialId) {
+        _.forEach(groupByTrialId, function (trialGroup, trialId) {
             let matchedTrial:any = _.find( props.trials, { 'nctId': trialId } );
             matchedTrial['priority'] = 0; // highest priority
             matchedTrial['matches'] = [];
-            const groupByArm = _.groupBy(groupByTrialId[trialId], 'armDescription');
-            const armDescriptions = Object.keys(groupByArm);
-            _.forEach(armDescriptions, function(armDescription) {
+            const groupByArm = _.groupBy(trialGroup, 'armDescription');
+            _.forEach(groupByArm, function(armGroup, armDescription) {
                 let armMatch: IArmMatch = {
                     armDescription: armDescription,
                     drugs: [],
@@ -267,11 +262,9 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         return; // skip the hidden arm
                     }
                 }
-
-                const groupByAge = _.groupBy(groupByArm[armDescription], 'trialAgeNumerical');
-                const ages = Object.keys(groupByAge);
-                _.forEach(ages, function(age) {
-                    const cancerTypes =  _.uniq(_.map(groupByAge[age], 'trialOncotreePrimaryDiagnosis'));
+                const groupByAge = _.groupBy(armGroup, 'trialAgeNumerical');
+                _.forEach(groupByAge, function(ageGroup, age) {
+                    const cancerTypes =  _.uniq(_.map(ageGroup, 'trialOncotreePrimaryDiagnosis'));
                     let generalCancerTypes: Array<string> = [];
                     let notCancerTypes: Array<string> = [];
                     _.map(cancerTypes, function(item) {
@@ -291,21 +284,19 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps, I
                         notMatches: []
                     };
                     const groupByGenomicAlteration = _.groupBy(groupByAge[age], 'genomicAlteration');
-                    const genomicAlterations = Object.keys(groupByGenomicAlteration);
-                    _.forEach(genomicAlterations, function(genomicAlteration) {
-                        const groupByPatientGenomic = _.groupBy(groupByGenomicAlteration[genomicAlteration], 'patientGenomic');
-                        const patientGenomics = Object.keys(groupByPatientGenomic);
+                    _.forEach(groupByGenomicAlteration, function(genomicAlterationGroup, genomicAlteration) {
+                        const groupByPatientGenomic = _.groupBy(genomicAlterationGroup, 'patientGenomic');
                         let genomicGroupMatch: IGenomicGroupMatch = {
                             genomicAlteration: genomicAlteration,
                             matches: []
                         };
-                        _.forEach(patientGenomics, function(patientGenomic) {
+                        _.forEach(groupByPatientGenomic, function(patientGenomicGroup) {
                             let genomicMatch: IGenomicMatch = {
-                                trueHugoSymbol: groupByPatientGenomic[patientGenomic][0].trueHugoSymbol,
-                                trueProteinChange: groupByPatientGenomic[patientGenomic][0].trueProteinChange,
+                                trueHugoSymbol: patientGenomicGroup[0].trueHugoSymbol,
+                                trueProteinChange: patientGenomicGroup[0].trueProteinChange,
                                 sampleIds: []
                             };
-                            const sampleIds = _.uniq(_.map(groupByPatientGenomic[patientGenomic], 'sampleId'));
+                            const sampleIds = _.uniq(_.map(patientGenomicGroup, 'sampleId'));
                             if (sampleIds.length > 1 && props.sampleManager) {
                                 props.sampleManager.samples.map((item:any) => {
                                     if (sampleIds.includes(item.id)) {
