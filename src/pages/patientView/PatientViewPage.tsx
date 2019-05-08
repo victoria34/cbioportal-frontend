@@ -188,7 +188,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
     }
     private shouldShowTrialMatch(patientViewPageStore: PatientViewPageStore): boolean {
         return patientViewPageStore.trialMatches.isComplete && patientViewPageStore.trialMatches.result.length > 0 &&
-            patientViewPageStore.matchMinerTrials.isComplete && patientViewPageStore.nctTrials.isComplete;
+            patientViewPageStore.matchMinerTrials.isComplete;
     }
 
     hideTissueImageTab(){
@@ -553,7 +553,6 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                             <TrialMatchTable sampleManager={sampleManager}
                                              trialMatches={patientViewPageStore.trialMatches.result}
                                              trials={patientViewPageStore.matchMinerTrials.result}
-                                             nctTrials={patientViewPageStore.nctTrials.result}
                                              showControlArm={false}
                                              containerWidth={WindowStore.size.width-20}/>
                         </MSKTab>

@@ -2,19 +2,13 @@
   margin: 0 0 3px 0;
 }
 .criteriaHr {
-  margin:3px 0 3px 0 !important;
+  margin:3px 0 !important;
   border-top-color: rgb(221, 221, 221) !important;
-}
-.diseasesUl {
-   padding-left: 15px;
 }
 .alterationUl{
   margin-bottom: 0 !important;
   list-style-type: none;
   padding-left: 15px;
-}
-.fontItalic{
-   font-size: 14px;
 }
 .genomicSpan {
    margin-right:5px;
@@ -26,10 +20,6 @@
   .firstLeft {
     flex: 1 1 auto;
     margin: 0 5px 0 0;
-  }
-  .armRight {
-    flex: 0 0 auto;
-    width: 250px;
   }
 
   .firstRight{

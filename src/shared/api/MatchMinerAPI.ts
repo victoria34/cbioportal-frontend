@@ -1,6 +1,5 @@
 import * as request from 'superagent';
-import * as _ from 'lodash';
-import { INctTrial, ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
+import { ITrial, ITrialMatch } from "shared/model/MatchMiner.ts";
 import { buildCBioPortalAPIUrl } from "./urls";
 
 /**
@@ -47,27 +46,6 @@ export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
             shortTitle: response.short_title,
             status: response.status,
             treatmentList: response.treatment_list
-        };
-    });
-}
-
-export async function getNctTrial(nctId: string): Promise<INctTrial> {
-    return request.get('https://clinicaltrialsapi.cancer.gov/v1/clinical-trial/'+ nctId)
-    .then((res) => {
-        const response = JSON.parse(res.text);
-        let interventions: Array<string> = [];
-        _.forEach(response.arms, function(arm) {
-            if (arm.interventions) {
-                _.forEach(arm.interventions, function(intervention) {
-                    if (intervention.inclusion_indicator === 'TRIAL' && intervention.intervention_type !== 'Other') {
-                        interventions.push(intervention.intervention_name);
-                    }
-                });
-            }
-        });
-        return {
-            nctId: response.nct_id,
-            interventions: _.uniq(interventions).sort()
         };
     });
 }

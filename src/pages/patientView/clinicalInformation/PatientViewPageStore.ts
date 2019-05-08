@@ -67,7 +67,8 @@ import {
     findSamplesWithoutCancerTypeClinicalData,
     fetchStudiesForSamplesWithoutCancerTypeClinicalData,
     concatMutationData,
-    fetchOncoKbCancerGenes
+    fetchOncoKbCancerGenes,
+    getMatchMinerTrials
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";
 import {stringListToSet} from "../../../shared/lib/StringUtils";
@@ -78,6 +79,8 @@ import { ClinicalAttribute } from 'shared/api/generated/CBioPortalAPI';
 import getBrowserWindow from "../../../shared/lib/getBrowserWindow";
 import {getNavCaseIdsCache} from "../../../shared/lib/handleLongUrls";
 import {CancerGene} from "shared/api/generated/OncoKbAPI";
+import { postMatchMinerTrialMatches } from "../../../shared/api/MatchMinerAPI";
+import { ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
 
 type PageMode = 'patient' | 'sample';
 
@@ -674,6 +677,41 @@ export class PatientViewPageStore {
             // fail silently, leave the error handling responsibility to the data consumer
         }
     }, ONCOKB_DEFAULT);
+
+    readonly trialMatches = remoteData<Array<ITrialMatch>>({
+        invoke: () => {
+            return postMatchMinerTrialMatches({mrn: this.patientId});
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
+
+    @computed get trialIds(): Array<string> {
+        if (this.trialMatches.result) {
+            let nctIds: Array<string> = [];
+            _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
+                nctIds.push(trialMatch.nctId);
+            });
+            nctIds = _.uniq(nctIds);
+            return nctIds;
+        } else {
+            return [];
+        }
+    }
+
+    readonly matchMinerTrials = remoteData<Array<ITrial>>({
+        invoke: async () => {
+            if (this.trialIds) {
+                return await getMatchMinerTrials(this.trialIds);
+            } else {
+                return [];
+            }
+        },
+        onError: (err: Error) => {
+            // fail silently
+        }
+    }, []);
 
     readonly cnaCivicGenes = remoteData<ICivicGene | undefined>({
         await: () => [
