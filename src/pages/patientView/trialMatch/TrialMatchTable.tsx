@@ -17,7 +17,6 @@ export type ITrialMatchProps = {
     trials: Array<ITrial>;
     trialMatches:Array<ITrialMatch>;
     containerWidth: number;
-    showControlArm: boolean;
 }
 
 export type ITrialMatchState = {

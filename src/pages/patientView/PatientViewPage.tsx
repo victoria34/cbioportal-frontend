@@ -553,7 +553,6 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                             <TrialMatchTable sampleManager={sampleManager}
                                              trialMatches={patientViewPageStore.trialMatches.result}
                                              trials={patientViewPageStore.matchMinerTrials.result}
-                                             showControlArm={false}
                                              containerWidth={WindowStore.size.width-20}/>
                         </MSKTab>
                     )}
