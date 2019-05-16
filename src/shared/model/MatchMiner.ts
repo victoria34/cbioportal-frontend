@@ -1,6 +1,6 @@
 export interface ITrial {
-    nctId: string;
-    protocolNo: string | null;
+    nctId: string | '';
+    protocolNo: string | '';
     phase: string;
     shortTitle: string;
     status: string;
@@ -8,7 +8,8 @@ export interface ITrial {
 }
 
 export interface ITrialMatch {
-    nctId: string;
+    nctId: string | '';
+    protocolNo: string | '';
     oncotreePrimaryDiagnosisName: string;
     gender: string | null;
     matchType: string;
@@ -25,6 +26,11 @@ export interface ITrialMatch {
     patientGenomic: string | null;
     trialAgeNumerical: string;
     trialOncotreePrimaryDiagnosis: string;
+}
+
+export interface ITrialQuery {
+    nct_id: string[];
+    protocol_no: string[];
 }
 
 export interface IGenomicMatch {
@@ -54,8 +60,8 @@ export interface IArmMatch {
 }
 
 export interface IDetailedTrialMatch {
-    nctId: string;
-    protocolNo: string | null;
+    nctId: string | '';
+    protocolNo: string | '';
     phase: string;
     shortTitle: string;
     status: string;

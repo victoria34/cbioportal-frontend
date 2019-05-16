@@ -8,13 +8,14 @@ import { buildCBioPortalAPIUrl } from "./urls";
 
 const cbioportalUrl = buildCBioPortalAPIUrl('api-legacy/proxy/matchminer/api');
 export async function postMatchMinerTrialMatches(query: object): Promise<Array<ITrialMatch>> {
-    return request.post(cbioportalUrl + '/query_trial_match')
+    return request.post(cbioportalUrl + '/post_trial_match')
     .set('Content-Type', 'application/json')
     .send(query)
     .then((res) => {
         const response = JSON.parse(JSON.parse(res.text));
         return response.map((record:any) => ({
             nctId: record.nct_id,
+            protocolNo: record.protocol_no,
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
             gender: record.gender,
             matchType: record.match_type,
@@ -35,8 +36,8 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
     });
 }
 
-export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
-    return request.get(cbioportalUrl + '/query_trial/'+ nctId)
+export async function getMatchMinerTrialByTypeId(type: string, id: string): Promise<ITrial> {
+    return request.get(cbioportalUrl + '/' + type + '/'+ id)
     .then((res) => {
         const response = JSON.parse(JSON.parse(res.text));
         return {
@@ -47,5 +48,39 @@ export async function getMatchMinerTrial(nctId: string): Promise<ITrial> {
             status: response.status,
             treatmentList: response.treatment_list
         };
+    });
+}
+
+export async function postMatchMinerTrial(query: object): Promise<Array<ITrial>> {
+    return request.post(cbioportalUrl + '/post_trial')
+    .set('Content-Type', 'application/json')
+    .send(query)
+    .then((res) => {
+        const response = JSON.parse(JSON.parse(res.text));
+        return response.map((record:any) => ({
+            nctId: record.nct_id,
+            protocolNo: record.protocol_no,
+            phase: record.phase,
+            shortTitle: record.short_title,
+            status: record.status,
+            treatmentList: record.treatment_list
+        }));
+    });
+}
+
+export async function postMatchMinerTrialsById(query: object): Promise<Array<ITrial>> {
+    return request.post(cbioportalUrl + '/trials')
+    .set('Content-Type', 'application/json')
+    .send(query)
+    .then((res) => {
+        const response = JSON.parse(JSON.parse(res.text));
+        return response.map((record:any) => ({
+            nctId: record.nct_id,
+            protocolNo: record.protocol_no,
+            phase: record.phase,
+            shortTitle: record.short_title,
+            status: record.status,
+            treatmentList: record.treatment_list
+        }));
     });
 }

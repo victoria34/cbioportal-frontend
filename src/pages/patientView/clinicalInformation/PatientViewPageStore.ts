@@ -67,8 +67,7 @@ import {
     findSamplesWithoutCancerTypeClinicalData,
     fetchStudiesForSamplesWithoutCancerTypeClinicalData,
     concatMutationData,
-    fetchOncoKbCancerGenes,
-    getMatchMinerTrials
+    fetchOncoKbCancerGenes
 } from "shared/lib/StoreUtils";
 import {indexHotspotsData, fetchHotspotsData} from "shared/lib/CancerHotspotsUtils";
 import {stringListToSet} from "../../../shared/lib/StringUtils";
@@ -79,8 +78,10 @@ import { ClinicalAttribute } from 'shared/api/generated/CBioPortalAPI';
 import getBrowserWindow from "../../../shared/lib/getBrowserWindow";
 import {getNavCaseIdsCache} from "../../../shared/lib/handleLongUrls";
 import {CancerGene} from "shared/api/generated/OncoKbAPI";
-import { postMatchMinerTrialMatches } from "../../../shared/api/MatchMinerAPI";
-import { ITrial, ITrialMatch } from "../../../shared/model/MatchMiner";
+import {
+    postMatchMinerTrialMatches, postMatchMinerTrialsById
+} from "../../../shared/api/MatchMinerAPI";
+import { ITrial, ITrialMatch, ITrialQuery } from "../../../shared/model/MatchMiner";
 
 type PageMode = 'patient' | 'sample';
 
@@ -317,7 +318,7 @@ export class PatientViewPageStore {
                             return getPathologyReport(patientId, i+1);
                         }, () => reports);
                 }
-                
+
                return getPathologyReport(this.patientId, 0);
             } else {
                 return Promise.resolve([]);
@@ -687,23 +688,33 @@ export class PatientViewPageStore {
         }
     }, []);
 
-    @computed get trialIds(): Array<string> {
+    @computed get trialIds(): ITrialQuery {
         if (this.trialMatches.result) {
-            let nctIds: Array<string> = [];
+            let nctIds = new Set<string>();
+            let protocolNos = new Set<string>();
             _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
-                nctIds.push(trialMatch.nctId);
+                if (_.isEmpty(trialMatch.protocolNo)) {
+                    nctIds.add(trialMatch.nctId);
+                } else {
+                    protocolNos.add(trialMatch.protocolNo);
+                }
             });
-            nctIds = _.uniq(nctIds);
-            return nctIds;
+            return {
+                nct_id: [...nctIds],
+                protocol_no: [...protocolNos]
+            };
         } else {
-            return [];
+            return {
+                nct_id: [],
+                protocol_no: []
+            };
         }
     }
 
     readonly matchMinerTrials = remoteData<Array<ITrial>>({
         invoke: async () => {
-            if (this.trialIds) {
-                return await getMatchMinerTrials(this.trialIds);
+            if (this.trialIds.protocol_no.length > 0 || this.trialIds.nct_id.length > 0) {
+                return postMatchMinerTrialsById(this.trialIds);
             } else {
                 return [];
             }
