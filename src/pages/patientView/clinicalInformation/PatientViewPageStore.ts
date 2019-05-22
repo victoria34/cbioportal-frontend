@@ -679,7 +679,7 @@ export class PatientViewPageStore {
         }
     }, ONCOKB_DEFAULT);
 
-    readonly trialMatches = remoteData<Array<ITrialMatch>>({
+    readonly trialMatches = remoteData<ITrialMatch[]>({
         invoke: () => {
             return postMatchMinerTrialMatches({mrn: this.patientId});
         },
@@ -688,11 +688,14 @@ export class PatientViewPageStore {
         }
     }, []);
 
-    @computed get trialIds(): ITrialQuery {
-        if (this.trialMatches.result) {
+    readonly trialIds = remoteData<ITrialQuery>({
+        await: () => [
+            this.trialMatches
+        ],
+        invoke: async() => {
             let nctIds = new Set<string>();
             let protocolNos = new Set<string>();
-            _.forEach(this.trialMatches.result, function(trialMatch: ITrialMatch) {
+            _.forEach(this.trialMatches.result, (trialMatch: ITrialMatch) => {
                 if (_.isEmpty(trialMatch.protocolNo)) {
                     nctIds.add(trialMatch.nctId);
                 } else {
@@ -703,18 +706,22 @@ export class PatientViewPageStore {
                 nct_id: [...nctIds],
                 protocol_no: [...protocolNos]
             };
-        } else {
-            return {
-                nct_id: [],
-                protocol_no: []
-            };
+        },
+        onError: (err: Error) => {
+            // fail silently
         }
-    }
+    }, {
+        nct_id: [],
+        protocol_no: []
+    });
 
-    readonly matchMinerTrials = remoteData<Array<ITrial>>({
+    readonly matchMinerTrials = remoteData<ITrial[]>({
+        await: () => [
+            this.trialIds
+        ],
         invoke: async () => {
-            if (this.trialIds.protocol_no.length > 0 || this.trialIds.nct_id.length > 0) {
-                return postMatchMinerTrialsById(this.trialIds);
+            if (this.trialIds.result.protocol_no.length > 0 || this.trialIds.result.nct_id.length > 0) {
+                return postMatchMinerTrialsById(this.trialIds.result);
             } else {
                 return [];
             }

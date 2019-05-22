@@ -32,10 +32,6 @@ class TrialMatchTableComponent extends LazyMobXTable<IDetailedTrialMatch> {
 @observer
 export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
 
-    constructor(props: ITrialMatchProps) {
-        super(props);
-    }
-
     @computed
     get columnsWidth() {
         return {
@@ -147,7 +143,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                             ))}
                         </span>
                         ) : (
-                        <span className={styles.genomicSpan + styles.firstLeft}>{genomicGroupMatch.genomicAlteration + ': '}
+                        <span className={styles.firstLeft}>{genomicGroupMatch.genomicAlteration + ': '}
                             { genomicGroupMatch.matches.length > 1 ? (
                                 <ul className={styles.alterationUl}>
                                     {genomicGroupMatch.matches.map((genomicMatch: IGenomicMatch) => (
@@ -238,12 +234,12 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
         const groupByTrialId = _.groupBy(props.trialMatches, 'nctId');
         let matchedTrials: Array<IDetailedTrialMatch> = [];
         const hiddenArmTypes = ['Control Arm', 'Placebo Arm'];
-        _.forEach(groupByTrialId, function (trialGroup, trialId) {
+        _.forEach(groupByTrialId, (trialGroup, trialId) => {
             let matchedTrial:any = _.find( props.trials, { 'nctId': trialId } );
             matchedTrial['priority'] = 0; // highest priority
             matchedTrial['matches'] = [];
             const groupByArm = _.groupBy(trialGroup, 'armDescription');
-            _.forEach(groupByArm, function(armGroup, armDescription) {
+            _.forEach(groupByArm, (armGroup, armDescription) => {
                 let armMatch: IArmMatch = {
                     armDescription: armDescription,
                     drugs: [],
@@ -260,13 +256,13 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                     }
                 }
                 const groupByAge = _.groupBy(armGroup, 'trialAgeNumerical');
-                _.forEach(groupByAge, function(ageGroup, age) {
+                _.forEach(groupByAge, (ageGroup, age) => {
                     const cancerTypes =  _.uniq(_.map(ageGroup, 'trialOncotreePrimaryDiagnosis'));
                     let generalCancerTypes: Array<string> = [];
                     let notCancerTypes: Array<string> = [];
-                    _.map(cancerTypes, function(item) {
-                       if (item.indexOf('!') !== -1) {
-                           notCancerTypes.push(item.replace(/!/g, ''));
+                    _.map(cancerTypes, (item) => {
+                       if (item.indexOf('!') > -1) {
+                           notCancerTypes.push(item.replace('!', ''));
                        } else {
                            generalCancerTypes.push(item);
                        }
@@ -281,13 +277,13 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                         notMatches: []
                     };
                     const groupByGenomicAlteration = _.groupBy(groupByAge[age], 'genomicAlteration');
-                    _.forEach(groupByGenomicAlteration, function(genomicAlterationGroup, genomicAlteration) {
+                    _.forEach(groupByGenomicAlteration, (genomicAlterationGroup, genomicAlteration) => {
                         const groupByPatientGenomic = _.groupBy(genomicAlterationGroup, 'patientGenomic');
                         let genomicGroupMatch: IGenomicGroupMatch = {
                             genomicAlteration: genomicAlteration,
                             matches: []
                         };
-                        _.forEach(groupByPatientGenomic, function(patientGenomicGroup) {
+                        _.forEach(groupByPatientGenomic, (patientGenomicGroup) => {
                             let genomicMatch: IGenomicMatch = {
                                 trueHugoSymbol: patientGenomicGroup[0].trueHugoSymbol,
                                 trueProteinChange: patientGenomicGroup[0].trueProteinChange,
@@ -324,7 +320,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
             });
             matchedTrials.push(matchedTrial);
         });
-        matchedTrials.sort(function(a,b) {
+        matchedTrials.sort((a,b) => {
             return a.priority - b.priority;
         });
         return matchedTrials;
