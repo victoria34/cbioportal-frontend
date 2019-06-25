@@ -54,14 +54,12 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                 <div>{trial.status}</div>
             </div>
         ),
-        sortBy:(trial: IDetailedTrialMatch) => (trial.protocolNo),
+        sortBy: (trial: IDetailedTrialMatch) => trial.protocolNo,
         width: this.columnsWidth[ColumnKey.ID]
     }, {
         name: ColumnKey.TITLE,
-        render: (trial: IDetailedTrialMatch) => (
-                <span>{trial.shortTitle}</span>
-        ),
-        sortBy:(trial: IDetailedTrialMatch) => (trial.shortTitle),
+        render: (trial: IDetailedTrialMatch) => (<span>{trial.shortTitle}</span>),
+        sortBy: (trial: IDetailedTrialMatch) => trial.shortTitle,
         width: this.columnsWidth[ColumnKey.TITLE]
     }, {
         name: ColumnKey.MATCHINGCRITERIA,
@@ -79,7 +77,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                                     </span>
                                 ))}
                             </div>
-                             <If condition={armMatch.armDescription !== 'null'}>
+                             <If condition={armMatch.armDescription !== ''}>
                                 <div className={styles.armDiv}>
                                     <span>Arm: {armMatch.armDescription}</span>
                                 </div>
@@ -114,7 +112,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                                     placement='bottomLeft'
                                     trigger={['hover', 'focus']}
                                     overlay={this.tooltipClinicalContent(clinicalGroupMatch.trialOncotreePrimaryDiagnosis.not)}
-                                    arrowContent={<div className="rc-tooltip-arrow-inner" />}
                                     destroyTooltipOnHide={false}
                                     onPopupAlign={placeArrowBottomLeft}
                                 >
@@ -174,7 +171,6 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                         placement='bottomLeft'
                         trigger={['hover', 'focus']}
                         overlay={this.tooltipGenomicContent(clinicalGroupMatch.notMatches)}
-                        arrowContent={<div className="rc-tooltip-arrow-inner" />}
                         destroyTooltipOnHide={false}
                         onPopupAlign={placeArrowBottomLeft}
                     >
@@ -245,7 +241,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                     drugs: [],
                     matches: []
                 };
-                if ( armDescription !== 'null' ) { // match for specific arm
+                if ( armDescription !== '' ) { // match for specific arm
                     const matchedArm = _.find( matchedTrial['treatmentList']['step'][0]['arm'], { 'arm_description': armDescription } );
                     if ( hiddenArmTypes.indexOf(matchedArm['arm_type']) < 0 ) {
                         if ( matchedArm[ 'drugs' ] ) {

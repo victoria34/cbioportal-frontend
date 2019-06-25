@@ -19,7 +19,7 @@ export async function postMatchMinerTrialMatches(query: object): Promise<Array<I
             oncotreePrimaryDiagnosisName: record.oncotree_primary_diagnosis_name,
             gender: record.gender,
             matchType: record.match_type,
-            armDescription: record.arm_description,
+            armDescription: record.arm_description ? record.arm_description : '',
             trueHugoSymbol: record.true_hugo_symbol,
             trialAccrualStatus: record.trial_accrual_status,
             matchLevel: record.match_level,
