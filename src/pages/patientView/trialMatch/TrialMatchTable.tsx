@@ -288,7 +288,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                     showCopyDownload={false}
                 />
                 <div className={styles.powered}>
-                    Powered by <a href="https://matchminer.org/" target="_blank">MatchMiner</a>
+                    Powered by <a href="https://oncokb.org/" target="_blank">OncoKB</a> & <a href="https://matchminer.org/" target="_blank">MatchMiner</a>
                 </div>
             </div>
         )

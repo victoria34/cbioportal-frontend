@@ -635,6 +635,18 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         )
                     }
 
+                    {
+                        this.shouldShowTrialMatch(this.patientViewPageStore) && (
+                            <MSKTab key={8} id="drugMatchTab" linkText="Matched Trials by Drug">
+                                <TrialMatchTable
+                                    sampleManager={sampleManager}
+                                    detailedTrialMatches={this.patientViewPageStore.detailedTrialMatches.result}
+                                    containerWidth={WindowStore.size.width-20}
+                                />
+                            </MSKTab>
+                        )
+                    }
+
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
                         {/*<div className="clearfix">*/}
                             {/*<FeatureTitle title="Mutational Signatures" isLoading={ this.patientViewPageStore.clinicalDataGroupedBySample.isPending } className="pull-left" />*/}
