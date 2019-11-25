@@ -209,7 +209,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                             overlay={this.tooltipGenomicContent(genomicGroupMatch.genomicAlteration)}
                             destroyTooltipOnHide={false}
                             onPopupAlign={placeArrowBottomLeft}>
-                            <i className={'fa fa-question-circle ' + styles.icon}></i>
+                            <i className={'fa fa-question-circle-o ' + styles.icon}></i>
                         </DefaultTooltip>
                     </div>
                 ))}
@@ -249,7 +249,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                         overlay={this.tooltipGenomicContent(mutationAndCnagenemicAlterations)}
                         destroyTooltipOnHide={false}
                         onPopupAlign={placeArrowBottomLeft}>
-                        <i className={'fa fa-question-circle ' + styles.icon}></i>
+                        <i className={'fa fa-question-circle-o ' + styles.icon}></i>
                     </DefaultTooltip>
                 </div>
                 }
@@ -265,7 +265,7 @@ export default class TrialMatchTable extends React.Component<ITrialMatchProps> {
                         overlay={this.tooltipGenomicContent(notMatches.WILDTYPE[0].genomicAlteration)}
                         destroyTooltipOnHide={false}
                         onPopupAlign={placeArrowBottomLeft}>
-                        <i className={'fa fa-question-circle ' + styles.icon}></i>
+                        <i className={'fa fa-question-circle-o ' + styles.icon}></i>
                     </DefaultTooltip>
                 </div>
                 }
