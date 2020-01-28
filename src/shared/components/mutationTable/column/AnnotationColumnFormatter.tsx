@@ -441,6 +441,7 @@ export default class AnnotationColumnFormatter {
                         status={annotation.oncoKbStatus}
                         indicator={annotation.oncoKbIndicator}
                         pubMedCache={pubMedCache}
+                        trialsCache={trialsCache}
                         userEmailAddress={columnProps.userEmailAddress}
                     />
                 </If>

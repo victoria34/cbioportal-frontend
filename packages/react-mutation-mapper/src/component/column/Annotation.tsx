@@ -33,6 +33,7 @@ export type AnnotationProps = {
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     pubMedCache?: MobxCache;
+    trialsCache?: MobxCache;
     resolveEntrezGeneId?: (mutation: Mutation) => number;
     resolveTumorType?: (mutation: Mutation) => string;
     // myCancerGenomeData?: IMyCancerGenomeData;
@@ -223,6 +224,7 @@ export default class Annotation extends React.Component<AnnotationProps, {}> {
                         status={annotation.oncoKbStatus}
                         indicator={annotation.oncoKbIndicator}
                         pubMedCache={this.props.pubMedCache}
+                        trialsCache={this.props.trialsCache}
                         userEmailAddress={this.props.userEmailAddress}
                     />
                 )}
