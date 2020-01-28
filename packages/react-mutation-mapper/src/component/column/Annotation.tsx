@@ -25,6 +25,7 @@ export type AnnotationProps = {
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     oncoKbEvidenceCache?: SimpleCache;
     pubMedCache?: MobxCache;
+    trialsCache?: MobxCache;
     resolveEntrezGeneId?: (mutation: Mutation) => number;
     resolveTumorType?: (mutation: Mutation) => string;
     // myCancerGenomeData?: IMyCancerGenomeData;
@@ -205,6 +206,7 @@ export default class Annotation extends React.Component<AnnotationProps, {}>
                         evidenceCache={this.props.oncoKbEvidenceCache}
                         evidenceQuery={evidenceQuery as any} // TODO as Query
                         pubMedCache={this.props.pubMedCache}
+                        trialsCache={this.props.trialsCache}
                         userEmailAddress={this.props.userEmailAddress}
                     />
                 }

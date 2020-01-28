@@ -20,6 +20,7 @@ import OncoKbFeedback from "./OncoKbFeedback";
 import annotationStyles from "../column/annotation.module.scss";
 import './oncokb.scss';
 import 'oncokb-styles/dist/oncokb.css';
+import { DefaultTrialsCache } from "../../cache/DefaultTrialsCache";
 
 export interface IOncoKbProps {
     status: "pending" | "error" | "complete";
@@ -27,6 +28,7 @@ export interface IOncoKbProps {
     evidenceCache?: SimpleCache;
     evidenceQuery?: Query;
     pubMedCache?: MobxCache;
+    trialsCache?: MobxCache;
     isCancerGene:boolean;
     geneNotExist:boolean;
     hugoGeneSymbol:string;
@@ -140,6 +142,7 @@ export default class OncoKB extends React.Component<IOncoKbProps, {}>
                 evidenceCache={this.props.evidenceCache}
                 evidenceQuery={this.props.evidenceQuery}
                 pubMedCache={this.props.pubMedCache}
+                trialsCache={this.props.trialsCache}
                 onLoadComplete={this.handleLoadComplete}
                 handleFeedbackOpen={this.props.disableFeedback ? undefined : this.handleFeedbackOpen}
             />

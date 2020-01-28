@@ -5,14 +5,19 @@ import {observer} from "mobx-react";
 import {MobxCache} from "../../model/MobxCache";
 import {IEvidence, IndicatorQueryResp, Query} from "../../model/OncoKb";
 import {SimpleCache} from "../../model/SimpleCache";
-import {extractPmids, generateOncogenicCitations, generateTreatments} from "../../util/OncoKbUtils";
+import {
+    extractCancerTypes, extractPmids, generateOncogenicCitations,
+    generateTreatments
+} from "../../util/OncoKbUtils";
 import OncoKbCard from "./OncoKbCard";
+import { TrialsRecords } from "../../cache/DefaultTrialsCache";
 
 export interface IOncoKbTooltipProps {
     indicator?: IndicatorQueryResp;
     evidenceCache?: SimpleCache;
     evidenceQuery?: Query;
     pubMedCache?: MobxCache;
+    trialsCache?: MobxCache;
     handleFeedbackOpen?: () => void;
     onLoadComplete?: () => void;
     hugoSymbol: string;
@@ -57,6 +62,19 @@ export default class OncoKbTooltip extends React.Component<IOncoKbTooltipProps, 
         return (this.props.pubMedCache && this.props.pubMedCache.cache) || {};
     }
 
+
+    public get trialsData(): ICache<any>
+    {
+        if (this.props.trialsCache && this.evidenceCacheData) {
+            const cancerTypes = extractCancerTypes(this.evidenceCacheData.data);
+            for (const cancerType of cancerTypes) {
+                this.props.trialsCache.get(cancerType);
+            }
+        }
+
+        return (this.props.trialsCache && this.props.trialsCache.cache) || {};
+    }
+
     public render()
     {
         let tooltipContent: JSX.Element = <span />;
@@ -83,6 +101,7 @@ export default class OncoKbTooltip extends React.Component<IOncoKbTooltipProps, 
         {
             const evidence = cacheData.data;
             const pmidData: ICache<any> = this.pmidData;
+            const trialsData: ICache<any> = this.trialsData;
             tooltipContent = (
                 <OncoKbCard
                     geneNotExist={this.props.geneNotExist}
@@ -99,10 +118,12 @@ export default class OncoKbTooltip extends React.Component<IOncoKbTooltipProps, 
                     }}
                     geneSummary={this.props.indicator.geneSummary}
                     variantSummary={this.props.indicator.variantSummary}
+                    tumorType={this.props.indicator.query.tumorType}
                     tumorTypeSummary={this.props.indicator.tumorTypeSummary}
                     biologicalSummary={this.props.indicator.mutationEffect ? this.props.indicator.mutationEffect.description : ''}
                     treatments={generateTreatments(evidence.treatments)}
                     pmidData={pmidData}
+                    trialsData={trialsData}
                     handleFeedbackOpen={this.props.handleFeedbackOpen}
                 />
             );

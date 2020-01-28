@@ -92,7 +92,7 @@ import {getVariantAlleleFrequency} from "../../../shared/lib/MutationUtils";
 import { AppStore, SiteError } from 'AppStore';
 import { getGeneFilterDefault } from './PatientViewPageStoreUtil';
 import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
-
+import NcitTrialsCache from "../../../shared/cache/NcitTrialsCache";
 
 type PageMode = 'patient' | 'sample';
 
@@ -931,11 +931,11 @@ export class PatientViewPageStore {
     @computed get mergedMutationData(): Mutation[][] {
         return mergeMutations(this.mutationData);
     }
-    
+
     @computed get mergedMutationDataIncludingUncalled(): Mutation[][] {
         return mergeMutationsIncludingUncalled(this.mutationData, this.uncalledMutationData);
     }
-    
+
     @computed get mergedMutationDataFilteredByGene():Mutation[][] {
         if (this.mutationTableGeneFilterOption === GeneFilterOption.ALL_SAMPLES) {
             return filterMutationsByProfiledGene(this.mergedMutationData, this.sampleIds, this.sampleToMutationGenePanelId.result, this.genePanelIdToEntrezGeneIds.result);
@@ -1052,6 +1052,10 @@ export class PatientViewPageStore {
 
     @cached get pubMedCache() {
         return new PubMedCache();
+    }
+
+    @cached get trialsCache() {
+        return new NcitTrialsCache();
     }
 
     @cached get copyNumberCountCache() {

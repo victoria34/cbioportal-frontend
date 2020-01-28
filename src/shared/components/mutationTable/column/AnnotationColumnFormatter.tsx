@@ -26,6 +26,7 @@ import {getEvidenceQuery} from "shared/lib/OncoKbUtils";
 import {is3dHotspot, isRecurrentHotspot} from "shared/lib/AnnotationUtils";
 import {ICivicVariant, ICivicGene, ICivicEntry, ICivicVariantData, ICivicGeneData, ICivicGeneDataWrapper, ICivicVariantDataWrapper} from "shared/model/Civic.ts";
 import {buildCivicEntry} from "shared/lib/CivicUtils";
+import NcitTrialsCache from "../../../cache/NcitTrialsCache";
 
 export interface IAnnotationColumnProps {
     enableOncoKb: boolean;
@@ -38,6 +39,7 @@ export interface IAnnotationColumnProps {
     oncoKbEvidenceCache?: OncoKbEvidenceCache;
     oncoKbCancerGenes? :IOncoKbCancerGenesWrapper;
     pubMedCache?: OncokbPubMedCache;
+    trialsCache?: NcitTrialsCache
     userEmailAddress?:string;
     civicGenes?: ICivicGeneDataWrapper;
     civicVariants?: ICivicVariantDataWrapper;
@@ -177,7 +179,7 @@ export default class AnnotationColumnFormatter
 
         return civicEntry;
     }
-    
+
     public static getCivicStatus(civicGenesStatus:"pending" | "error" | "complete",
                                  civicVariantsStatus:"pending" | "error" | "complete"): "pending" | "error" | "complete"
     {
@@ -196,7 +198,7 @@ export default class AnnotationColumnFormatter
         if (oncoKbData.uniqueSampleKeyToTumorType === null || oncoKbData.indicatorMap === null) {
             return undefined;
         }
-        
+
         const id = generateQueryVariantId(
             mutation.gene.entrezGeneId,
             oncoKbData.uniqueSampleKeyToTumorType[mutation.uniqueSampleKey],
@@ -208,7 +210,7 @@ export default class AnnotationColumnFormatter
 
         if (indicator && indicator.query.tumorType === null && studyIdToStudy) {
             const studyMetaData = studyIdToStudy[mutation.studyId];
-            if (studyMetaData.cancerTypeId !== "mixed") {           
+            if (studyMetaData.cancerTypeId !== "mixed") {
                 indicator.query.tumorType = studyMetaData.cancerType.name;
             }
         }
@@ -313,19 +315,21 @@ export default class AnnotationColumnFormatter
         {
             evidenceQuery = this.getEvidenceQuery(data[0], columnProps.oncoKbData.result);
         }
-        
+
         return AnnotationColumnFormatter.mainContent(annotation,
             columnProps,
             columnProps.oncoKbEvidenceCache,
             evidenceQuery,
-            columnProps.pubMedCache);
+            columnProps.pubMedCache,
+            columnProps.trialsCache);
     }
 
     public static mainContent(annotation:IAnnotation,
                               columnProps:IAnnotationColumnProps,
                               evidenceCache?: OncoKbEvidenceCache,
                               evidenceQuery?: Query,
-                              pubMedCache?:OncokbPubMedCache)
+                              pubMedCache?:OncokbPubMedCache,
+                              trialsCache?:NcitTrialsCache)
     {
         return (
             <span style={{display:'flex', minWidth:100}}>
@@ -339,6 +343,7 @@ export default class AnnotationColumnFormatter
                         evidenceCache={evidenceCache}
                         evidenceQuery={evidenceQuery}
                         pubMedCache={pubMedCache}
+                        trialsCache={trialsCache}
                         userEmailAddress={columnProps.userEmailAddress}
                     />
                 </If>

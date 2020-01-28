@@ -31,10 +31,12 @@ type OncoKbCardPropsBase = {
     mutationEffectCitations: Citations;
     geneSummary: string;
     variantSummary: string;
+    tumorType: string;
     tumorTypeSummary: string;
     biologicalSummary: string;
     treatments: OncoKbTreatment[];
     pmidData: ICache;
+    trialsData: ICache;
     handleFeedbackOpen?: React.EventHandler<any>;
 };
 
@@ -150,7 +152,9 @@ export default class OncoKbCard extends React.Component<OncoKbCardProps>
                                                 {this.props.treatments!.length > 0 &&
                                                 <div style={{marginTop: 10}}>
                                                     <OncoKbTreatmentTable
+                                                        tumorType={this.props.tumorType!}
                                                         pmidData={this.props.pmidData!}
+                                                        trialsData={this.props.trialsData!}
                                                         treatments={this.props.treatments!}
                                                     />
                                                 </div>

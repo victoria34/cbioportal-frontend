@@ -23,6 +23,7 @@ import GeneSummary from "./GeneSummary";
 import LollipopMutationPlot from "../lollipopMutationPlot/LollipopMutationPlot";
 import {DEFAULT_MUTATION_COLUMNS} from "../mutationTable/MutationColumnHelper";
 import {TrackDataStatus, TrackName, TrackVisibility} from "../track/TrackSelector";
+import { DefaultTrialsCache } from "../../cache/DefaultTrialsCache";
 
 export type MutationMapperProps = {
     hugoSymbol?: string;
@@ -58,6 +59,7 @@ export type MutationMapperProps = {
     mutationTableInitialSortDirection?: ColumnSortDirection;
     mutationRates?: MutationRate[];
     pubMedCache?: MobxCache;
+    trialsCache?: MobxCache;
     // TODO annotateMutations?: boolean;
     genomeNexusUrl?: string;
     oncoKbUrl?: string;
@@ -212,6 +214,10 @@ export default class MutationMapper<P extends MutationMapperProps = MutationMapp
         return this.props.pubMedCache ? this.props.pubMedCache!: new DefaultPubMedCache();
     }
 
+    protected get trialsCache(): MobxCache {
+        return this.props.trialsCache ? this.props.trialsCache!: new DefaultTrialsCache();
+    }
+
     @computed
     protected get windowWrapper(): {size: {width: number, height: number}} {
         return this.props.windowWrapper ? this.props.windowWrapper! : getDefaultWindowInstance();
@@ -258,6 +264,7 @@ export default class MutationMapper<P extends MutationMapperProps = MutationMapp
                     indexedMyVariantInfoAnnotations={this.store.indexedMyVariantInfoAnnotations}
                     indexedVariantAnnotations={this.store.indexedVariantAnnotations}
                     pubMedCache={this.pubMedCache}
+                    trialsCache={this.trialsCache}
                     info={this.mutationTableInfo}
                 />
             );

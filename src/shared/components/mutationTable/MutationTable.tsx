@@ -52,6 +52,7 @@ import ClinVarColumnFormatter from "./column/ClinVarColumnFormatter";
 import autobind from "autobind-decorator";
 import DbsnpColumnFormatter from "./column/DbsnpColumnFormatter";
 import {getEvidenceQuery} from "../../lib/OncoKbUtils";
+import NcitTrialsCache from "../../cache/NcitTrialsCache";
 
 
 export interface IMutationTableProps {
@@ -64,6 +65,7 @@ export interface IMutationTableProps {
     mrnaExprRankCache?:MrnaExprRankCache;
     variantCountCache?:VariantCountCache;
     pubMedCache?:PubMedCache;
+    trialsCache?:NcitTrialsCache;
     mutationCountCache?:MutationCountCache;
     genomeNexusCache?:GenomeNexusCache;
     genomeNexusMyVariantInfoCache?:GenomeNexusMyVariantInfoCache
@@ -483,6 +485,7 @@ export default class MutationTable<P extends IMutationTableProps> extends React.
                 oncoKbEvidenceCache: this.props.oncoKbEvidenceCache,
                 oncoKbCancerGenes: this.props.oncoKbCancerGenes,
                 pubMedCache: this.props.pubMedCache,
+                trialsCache: this.props.trialsCache,
                 civicGenes: this.props.civicGenes,
                 civicVariants: this.props.civicVariants,
                 enableCivic: this.props.enableCivic as boolean,
@@ -587,13 +590,13 @@ export default class MutationTable<P extends IMutationTableProps> extends React.
             visible: false,
             align: "right"
         };
-        
+
         this._columns[MutationTableColumnType.GNOMAD] = {
             name: "gnomAD",
             render: (d:Mutation[]) => GnomadColumnFormatter.renderFunction(d, this.props.genomeNexusMyVariantInfoCache as GenomeNexusMyVariantInfoCache),
             sortBy: (d:Mutation[]) => GnomadColumnFormatter.getSortValue(d, this.props.genomeNexusMyVariantInfoCache as GenomeNexusMyVariantInfoCache),
             download: (d:Mutation[]) => GnomadColumnFormatter.download(d, this.props.genomeNexusMyVariantInfoCache as GenomeNexusMyVariantInfoCache),
-            tooltip: (<span><a href="https://gnomad.broadinstitute.org/">gnomAD</a> population allele frequencies. 
+            tooltip: (<span><a href="https://gnomad.broadinstitute.org/">gnomAD</a> population allele frequencies.
             Overall population allele frequency is shown. Hover over a frequency to see the frequency for each specific population.</span>),
             defaultSortDirection: "desc",
             visible: false,

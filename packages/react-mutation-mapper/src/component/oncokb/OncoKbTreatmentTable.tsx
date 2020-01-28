@@ -2,6 +2,7 @@ import {DefaultTooltip, ICache, LEVELS} from "cbioportal-frontend-commons";
 import {observer} from "mobx-react";
 import * as React from 'react';
 import ReactTable from "react-table";
+import _ from "lodash";
 
 import {ArticleAbstract, OncoKbTreatment} from "../../model/OncoKb";
 import {levelIconClassNames, mergeAlterations} from "../../util/OncoKbUtils";
@@ -13,9 +14,12 @@ import SummaryWithRefs from "./SummaryWithRefs";
 
 import mainStyles from './main.module.scss';
 import "./oncoKbTreatmentTable.scss";
+import TrialsList from "./TrialsList";
 
 type OncoKbTreatmentTableProps = {
+    tumorType: string;
     treatments: OncoKbTreatment[];
+    trialsData: ICache<any>;
     pmidData: ICache<any>;
 };
 
@@ -40,6 +44,36 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
             ) : <span/>
     };
 
+    public hasTrialsByCancerType(treatment: string, cancerType: string, trialsData?: ICache<any>) {
+        let treatmentWithTooltip: JSX.Element[] = [];
+        if (!_.isUndefined( trialsData) && !_.isUndefined( trialsData[ cancerType ])) {
+            if (trialsData[cancerType].status === 'complete' && trialsData[ cancerType ].data.length > 0) {
+                const drugsList = treatment.split(/\s?[,]\s?/);
+                drugsList.map( (drugs: string, drugsIndex: number) => {
+                    treatmentWithTooltip.push(this.getTrialsTooltip(drugs,
+                        drugsIndex !== drugsList.length - 1, ', ', cancerType, trialsData!));
+                });
+            } else if (trialsData[cancerType].status === 'pending') {
+                return <i className="fa fa-spinner fa-spin"/>;
+            }
+            return treatmentWithTooltip;
+        }
+        return <span>{treatment}</span>;
+    };
+
+    public getTrialsTooltip(drug: string, addSeparator: boolean, separator: string, cancerType: string, trialsData: ICache<any>) {
+        return (
+            <span>
+                {`${drug} `}
+                <TrialsList
+                    cancerType={cancerType}
+                    treatment={drug}
+                    trialsData={trialsData}
+                />
+                { addSeparator && <span> {separator}</span>}
+            </span>
+        );
+    }
     readonly columns = [
         {
             id: "level",
@@ -80,7 +114,7 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
             accessor: "treatment",
             Cell: (props: {original: OncoKbTreatment}) =>
                 <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
-                    {props.original.treatment}
+                    {this.hasTrialsByCancerType(props.original.treatment, props.original.cancerType, this.props.trialsData)}
                 </div>
         },
         {

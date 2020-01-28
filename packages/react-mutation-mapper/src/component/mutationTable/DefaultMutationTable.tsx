@@ -31,6 +31,7 @@ export type DefaultMutationTableProps = {
     indexedVariantAnnotations?: RemoteData<{[genomicLocation: string]: VariantAnnotation} | undefined>;
     oncoKbEvidenceCache?: SimpleCache;
     pubMedCache?: MobxCache;
+    trialsCache?: MobxCache;
     columns: Column<Partial<Mutation>>[];
     appendColumns?: boolean;
 } & DataTableProps<Partial<Mutation>>;
@@ -117,6 +118,7 @@ export default class DefaultMutationTable extends React.Component<DefaultMutatio
                         oncoKbCancerGenes={this.props.oncoKbCancerGenes}
                         oncoKbEvidenceCache={this.props.oncoKbEvidenceCache}
                         pubMedCache={this.props.pubMedCache}
+                        trialsCache={this.props.trialsCache}
                     />;
             case MutationColumn.GNOMAD:
                 return (column: any) =>

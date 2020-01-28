@@ -195,6 +195,29 @@ export function extractPmids(evidence:any)
     return refs;
 }
 
+export function extractCancerTypes(evidence:any)
+{
+    let refs: string[] = [];
+
+    if (evidence.treatments &&
+        _.isArray(evidence.treatments.sensitivity))
+    {
+        evidence.treatments.sensitivity.forEach((item:any) => {
+            refs.push(item.tumorType)
+        });
+    }
+
+    if (evidence.treatments &&
+        _.isArray(evidence.treatments.resistance))
+    {
+        evidence.treatments.resistance.forEach((item:any) => {
+            refs.push(item.tumorType)
+        });
+    }
+
+    return _.uniq(refs);
+}
+
 export function generateOncogenicCitations(oncogenicRefs:any):number[]
 {
     return _.isArray(oncogenicRefs) ?
