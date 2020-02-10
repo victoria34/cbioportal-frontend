@@ -17,9 +17,9 @@ import "./oncoKbTreatmentTable.scss";
 import TrialsList from "./TrialsList";
 
 type OncoKbTreatmentTableProps = {
-    tumorType: string;
+    // tumorType: string;
     treatments: OncoKbTreatment[];
-    trialsData: ICache<any>;
+    // trialsData?: ICache<any>;
     pmidData: ICache<any>;
 };
 
@@ -44,40 +44,29 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
             ) : <span/>
     };
 
-    public hasTrialsByCancerType(treatment: string, cancerType: string, trialsData?: ICache<any>) {
-        let treatmentWithTooltip: JSX.Element[] = [];
-        if (!_.isUndefined( trialsData) && !_.isUndefined( trialsData[ cancerType ])) {
-            if (trialsData[cancerType].status === 'complete' && trialsData[ cancerType ].data.length > 0) {
-                const drugsList = treatment.split(/\s?[,]\s?/);
-                drugsList.map( (drugs: string, drugsIndex: number) => {
-                    treatmentWithTooltip.push(this.getTrialsTooltip(drugs,
-                        drugsIndex !== drugsList.length - 1, ', ', cancerType, trialsData!));
-                });
-            } else if (trialsData[cancerType].status === 'pending') {
-                return <i className="fa fa-spinner fa-spin"/>;
-            }
-            return treatmentWithTooltip;
-        }
-        return <span>{treatment}</span>;
-    };
+    // trialTooltipContent = (treatment: string, cancerType: string, trialsData: ICache<any>) => {
+    //     return (!_.isUndefined(trialsData)) ?
+    //         () => (
+    //             <TrialsList
+    //                 cancerType={cancerType}
+    //                 treatment={treatment}
+    //                 trialsData={trialsData}
+    //             />
+    //         ) : <span/>
+    // };
 
-    public getTrialsTooltip(drug: string, addSeparator: boolean, separator: string, cancerType: string, trialsData: ICache<any>) {
-        return (
-            <span>
-                {`${drug} `}
-                <TrialsList
-                    cancerType={cancerType}
-                    treatment={drug}
-                    trialsData={trialsData}
-                />
-                { addSeparator && <span> {separator}</span>}
-            </span>
-        );
-    }
+    // isTrialsTooltipAvailable(patientCanerType: string, oncokbCancerType: string) {
+    //     const specialTumorTypes = ['all tumors', 'all solid tumors', 'all liquid tumors'];
+    //     if () {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
     readonly columns = [
         {
             id: "level",
-            Header: <span>Level</span>,
+            Header: <span><b>Level</b></span>,
             accessor: "level",
             maxWidth: 45,
             sortMethod: (a: string, b: string) =>
@@ -98,9 +87,10 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
         },
         {
             id: "variant",
-            Header: <span>Alteration(s)</span>,
+            Header: <span><b>Alteration(s)</b></span>,
             accessor: "variant",
             minWidth: 80,
+            style: {textAlign: "center" },
             sortMethod: (a: string[], b: string[]) => defaultArraySortMethod(a, b),
             Cell: (props: { value: string[] }) =>
                 <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
@@ -110,18 +100,20 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
         },
         {
             id: "treatment",
-            Header: <span>Drug(s)</span>,
+            Header: <span><b>Drug(s)</b></span>,
             accessor: "treatment",
+            style: {textAlign: "center" },
             Cell: (props: {original: OncoKbTreatment}) =>
                 <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
-                    {this.hasTrialsByCancerType(props.original.treatment, props.original.cancerType, this.props.trialsData)}
+                    {props.original.treatment}
                 </div>
         },
         {
             id: "cancerType",
-            Header: <span>Level-associated<br/>cancer type(s)</span>,
+            Header: <span><b>Level-associated<br/>cancer type(s)</b></span>,
             accessor: "cancerType",
             minWidth: 120,
+            style: {textAlign: "center" },
             Cell: (props: {original: OncoKbTreatment}) =>
                 <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
                     {props.original.cancerType}
@@ -129,9 +121,10 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
         },
         {
             id: "referenceList",
-            Header: <span />,
+            Header: <span><b>Ref</b></span>,
             sortable: false,
-            maxWidth: 25,
+            maxWidth: 40,
+            style: {textAlign: "center" },
             Cell: (props: {original: OncoKbTreatment}) =>
                 (props.original.abstracts.length > 0 || props.original.pmids.length > 0) &&
                 <DefaultTooltip
@@ -144,11 +137,33 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
                     }
                     placement="right"
                     trigger={['hover', 'focus']}
-                    destroyTooltipOnHide={true}
+                    destroyTooltipOnHide={false}
                 >
                     <i className="fa fa-book"/>
                 </DefaultTooltip>
         }
+        // {
+        //     id: "trialList",
+        //     Header: <span><b>Trials</b></span>,
+        //     sortable: false,
+        //     maxWidth: 50,
+        //     style: {textAlign: "center" },
+        //     Cell: (props: {original: OncoKbTreatment}) =>
+        //         (props.original.cancerType.toLowerCase() === this.props.tumorType.toLowerCase() || []) &&
+        //         <DefaultTooltip
+        //             overlay={
+        //                 this.trialTooltipContent(
+        //                     props.original.treatment,
+        //                     props.original.cancerType,
+        //                     this.props.trialsData)
+        //             }
+        //             placement="right"
+        //             trigger={['hover', 'focus']}
+        //             destroyTooltipOnHide={false}
+        //         >
+        //             <i className="fa fa-medkit"/>
+        //         </DefaultTooltip>
+        // }
     ];
 
     public render() {
