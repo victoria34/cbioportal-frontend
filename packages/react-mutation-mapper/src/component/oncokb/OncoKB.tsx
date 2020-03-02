@@ -62,11 +62,6 @@ export function download(
     return `${oncogenic}, ${level}`;
 }
 
-export function hideArrow(tooltipEl: any) {
-    const arrowEl = tooltipEl.querySelector('.rc-tooltip-arrow');
-    arrowEl.style.display = 'none';
-}
-
 @observer
 export default class OncoKB extends React.Component<IOncoKbProps, {}> {
     @observable showFeedback: boolean = false;
