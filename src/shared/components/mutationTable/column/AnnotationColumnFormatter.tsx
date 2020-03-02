@@ -12,7 +12,7 @@ import OncoKbEvidenceCache from "shared/cache/OncoKbEvidenceCache";
 import OncokbPubMedCache from "shared/cache/PubMedCache";
 import MyCancerGenome from "shared/components/annotation/MyCancerGenome";
 import Civic from "shared/components/annotation/Civic";
-import {IOncoKbCancerGenesWrapper, IOncoKbData, IOncoKbDataWrapper} from "shared/model/OncoKB";
+import { IEvidence, IOncoKbCancerGenesWrapper, IOncoKbData, IOncoKbDataWrapper } from "shared/model/OncoKB";
 import {IMyCancerGenomeData, IMyCancerGenome} from "shared/model/MyCancerGenome";
 import {IHotspotDataWrapper} from "shared/model/CancerHotspots";
 import {CancerStudy, Mutation} from "shared/api/generated/CBioPortalAPI";
@@ -20,13 +20,18 @@ import {
     CancerGene,
     generateQueryVariantId,
     IndicatorQueryResp,
-    Query
+    Query,DefaultTooltip, ICache
 } from "cbioportal-frontend-commons";
 import {getEvidenceQuery} from "shared/lib/OncoKbUtils";
 import {is3dHotspot, isRecurrentHotspot} from "shared/lib/AnnotationUtils";
 import {ICivicVariant, ICivicGene, ICivicEntry, ICivicVariantData, ICivicGeneData, ICivicGeneDataWrapper, ICivicVariantDataWrapper} from "shared/model/Civic.ts";
 import {buildCivicEntry} from "shared/lib/CivicUtils";
-import NcitTrialsCache from "../../../cache/NcitTrialsCache";
+import NcitTrialsCache from "../../../cache/NcitTrialsCache";;
+import TrialsList from "../../../../../packages/react-mutation-mapper/src/component/oncokb/TrialsList";
+import OncoKbTooltip from "../../../../../packages/react-mutation-mapper/src/component/oncokb/OncoKbTooltip";
+import { generateTreatments } from "../../../../../packages/react-mutation-mapper/src/util/OncoKbUtils";
+import { ICacheData } from "../../../../../packages/react-mutation-mapper/src/model/SimpleCache";
+import ClinicalTrials from "../../../../../packages/react-mutation-mapper/src/component/oncokb/ClinicalTrials";
 
 export interface IAnnotationColumnProps {
     enableOncoKb: boolean;
@@ -331,6 +336,7 @@ export default class AnnotationColumnFormatter
                               pubMedCache?:OncokbPubMedCache,
                               trialsCache?:NcitTrialsCache)
     {
+
         return (
             <span style={{display:'flex', minWidth:100}}>
                 <If condition={columnProps.enableOncoKb || false}>
@@ -345,6 +351,15 @@ export default class AnnotationColumnFormatter
                         pubMedCache={pubMedCache}
                         trialsCache={trialsCache}
                         userEmailAddress={columnProps.userEmailAddress}
+                    />
+                </If>
+                <If condition={columnProps.enableOncoKb && annotation.oncoKbGeneExist && annotation.isOncoKbCancerGene || false}>
+                    <ClinicalTrials
+                        hugoGeneSymbol={annotation.hugoGeneSymbol}
+                        status={annotation.oncoKbStatus}
+                        evidenceCache={evidenceCache}
+                        evidenceQuery={evidenceQuery}
+                        trialsCache={trialsCache}
                     />
                 </If>
                 <If condition={columnProps.enableCivic || false}>

@@ -11,7 +11,7 @@ import {
     annotationIconClassNames,
     calcOncogenicScore,
     calcResistanceLevelScore,
-    calcSensitivityLevelScore,
+    calcSensitivityLevelScore, hideArrow,
 } from "../../util/OncoKbUtils";
 import {errorIcon, loaderIcon} from "../StatusHelpers";
 import OncoKbTooltip from "./OncoKbTooltip";
@@ -59,11 +59,6 @@ export function download(indicator?: IndicatorQueryResp|undefined|null): string
     const level = indicator.highestSensitiveLevel ? indicator.highestSensitiveLevel.toLowerCase() : "level NA";
 
     return `${oncogenic}, ${level}`;
-}
-
-export function hideArrow(tooltipEl: any) {
-    const arrowEl = tooltipEl.querySelector('.rc-tooltip-arrow');
-    arrowEl.style.display = 'none';
 }
 
 @observer

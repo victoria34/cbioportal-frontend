@@ -5,9 +5,7 @@ export interface ITrialsByDrug {
 export type ITrial = {
     briefTitle: string;
     currentTrialStatus: string;
-    // principalInvestigator: string;
     drugs: IDrug[];
-    // isUSTrial: boolean;
     nctId: string;
 };
 
@@ -15,5 +13,13 @@ export type IDrug = {
     ncitCode: string;
     drugName: string;
 };
+
+// export type INcitTrial = {
+//     title: string;
+//     status: string;
+//     nctId: string;
+//     author?: string;
+//     isUSTrial?: boolean;
+// };
 
 

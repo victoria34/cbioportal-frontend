@@ -10,6 +10,7 @@ import {
 
 import {Mutation} from "../model/Mutation";
 import {IndicatorQueryResp, IOncoKbData, OncoKbTreatment} from "../model/OncoKb";
+import { IDrug, ITrial } from "../model/NcitTrial";
 
 // oncogenic value => oncogenic class name
 const ONCOGENIC_CLASS_NAMES:{[oncogenic:string]: string} = {
@@ -568,4 +569,27 @@ export function defaultOncoKbFilter(mutation: Mutation,
     }
 
     return filter;
+}
+
+export function hideArrow(tooltipEl: any) {
+    const arrowEl = tooltipEl.querySelector('.rc-tooltip-arrow');
+    arrowEl.style.display = 'none';
+}
+
+export function matchedTrials(trialsData: ITrial[], treatment: string) {
+    const trials: ITrial[] = [];
+    let drugNames: string[] = [];
+    if (treatment.includes('+') || treatment.includes(',')){
+        drugNames = _.uniq(_.flatten(_.values(treatment.split(/\s?[,]\s?/).map( (drugs: string) =>
+            drugs.split(/\s?[+]\s?/)))));
+    } else {
+        drugNames.push(treatment);
+    }
+    trialsData.forEach((trial: ITrial) => {
+        const trialDrugNames = trial.drugs.map((drug:IDrug) => drug.drugName);
+        if (_.difference(drugNames, trialDrugNames).length === 0) {
+            trials.push(trial);
+        }
+    });
+    return trials;
 }

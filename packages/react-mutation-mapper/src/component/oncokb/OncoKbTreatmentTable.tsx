@@ -137,7 +137,7 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
                     }
                     placement="right"
                     trigger={['hover', 'focus']}
-                    destroyTooltipOnHide={false}
+                    destroyTooltipOnHide={true}
                 >
                     <i className="fa fa-book"/>
                 </DefaultTooltip>

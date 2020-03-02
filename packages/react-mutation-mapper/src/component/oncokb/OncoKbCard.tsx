@@ -162,11 +162,11 @@ export default class OncoKbCard extends React.Component<OncoKbCardProps>
                                                                 />
                                                             </Tab>
                                                             <Tab eventKey="trials" title="Clinical Trials">
-                                                                <ClinicalTrialTable
-                                                                    cancerType={_.upperFirst(this.props.tumorType!)}
-                                                                    trialsData={this.props.trialsData!}
-                                                                    treatments={this.props.treatments!}
-                                                                />
+                                                                {/*<ClinicalTrialTable*/}
+                                                                    {/*cancerType={_.upperFirst(this.props.tumorType!)}*/}
+                                                                    {/*trialsData={this.props.trialsData!}*/}
+                                                                    {/*treatments={this.props.treatments!}*/}
+                                                                {/*/>*/}
                                                             </Tab>
                                                         </Tabs>
                                                     </div>
