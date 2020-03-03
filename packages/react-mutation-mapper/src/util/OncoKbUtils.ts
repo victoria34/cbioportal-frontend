@@ -576,7 +576,7 @@ export function hideArrow(tooltipEl: any) {
     arrowEl.style.display = 'none';
 }
 
-export function matchedTrials(trialsData: ITrial[], treatment: string) {
+export function matchTrialsByTreatment(trialsData: ITrial[], treatment: string) {
     const trials: ITrial[] = [];
     let drugNames: string[] = [];
     if (treatment.includes('+') || treatment.includes(',')){

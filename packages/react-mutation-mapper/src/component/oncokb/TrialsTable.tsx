@@ -1,13 +1,12 @@
 import {observer} from "mobx-react";
 import * as React from 'react';
 import ReactTable from "react-table";
-import {defaultSortMethod} from "../../util/ReactTableUtils";
 import "./oncoKbTreatmentTable.scss";
-import { ITrial } from "../../model/NcitTrial";
+import { IMatchedTrials, ITrial } from "../../model/NcitTrial";
 import styles from './listGroupItem.module.scss';
 
 type TrialsTableProps = {
-    trials: ITrial[];
+    trials: IMatchedTrials[];
 };
 
 
@@ -15,6 +14,7 @@ type TrialsTableProps = {
 export default class TrialsTable extends React.Component<TrialsTableProps> {
 
     getContentColor(content: string) {
+        console.log(content);
         content = content.toLowerCase();
         if (content.includes('open') || content.includes('active')) {
             return {color: 'green'};
@@ -26,47 +26,40 @@ export default class TrialsTable extends React.Component<TrialsTableProps> {
 
     readonly columns = [
         {
-            id: "nctId",
-            Header: <span><b>ID</b></span>,
-            accessor: "nctId",
-            maxWidth: 100,
-            style: {textAlign: "center" },
-            sortMethod: (a: string, b: string) => defaultSortMethod(a, b),
-            Cell: (props: {original: ITrial}) =>
+            id: "treatment",
+            Header: <span><b>Drug(s)</b></span>,
+            accessor: "treatment",
+            maxWidth: 200,
+            style: { display: "flex", justifyContent: "center", alignItems: "center" },
+            Cell: (props: {original: IMatchedTrials}) =>
                 <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
-                    <a
-                        className={styles["list-group-item-title"]}
-                        href={`https://clinicaltrials.gov/ct2/show/${props.original.nctId}`}
-                        target="_blank"
-                    >
-                    {props.original.nctId}
-                    </a>
-                    <br/>
-                    <span style={this.getContentColor(props.original.currentTrialStatus)}>{props.original.currentTrialStatus}</span>
+                    {props.original.treatment}
                 </div>
-
         },
-        // {
-        //     id: "currentTrialStatus",
-        //     Header: <span><b>Status</b></span>,
-        //     accessor: "currentTrialStatus",
-        //     maxWidth: 80,
-        //     style: {textAlign: "center" },
-        //     sortMethod: (a: string, b: string) => defaultSortMethod(a, b),
-        //     Cell: (props: {value: string}) =>
-        //         <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
-        //             <span style={this.getContentColor(props.value)}>{props.value}</span>
-        //         </div>
-        //
-        // },
         {
-            id: "briefTitle",
-            Header: <span><b>Title</b></span>,
-            accessor: "briefTitle",
-            Cell: (props: {value: string}) =>
-                <div style={{whiteSpace: "normal", lineHeight: '1rem'}}>
-                    {props.value}
+            id: "trials",
+            Header: <span><b>Trials</b><button style={{float: 'right', backgroundColor: '#1c75cd', color: '#fff'}}>Display All</button></span>,
+            accessor: "trials",
+            Cell: (props: {original: IMatchedTrials}) => (
+                <div>
+                    { props.original.trials.map((trial: ITrial) =>
+                        <div style={{marginBottom: 5}}>
+                            <a style={{marginRight: 5}}
+                                className={styles["list-group-item-title"]}
+                                href={`https://clinicaltrials.gov/ct2/show/${trial.nctId}`}
+                                target="_blank"
+                            >
+                                {trial.nctId}
+                            </a>
+                            <span>
+                                <span style={this.getContentColor(trial.currentTrialStatus)}>{trial.currentTrialStatus}</span>
+                                {':'}
+                            </span>
+                            <span style={{marginLeft: 5, lineHeight: '1rem'}}>{trial.briefTitle.length > 36 ? trial.briefTitle.substring(0, 36) + '...' : trial.briefTitle}</span>
+                        </div>
+                    )}
                 </div>
+            )
         }
     ];
 
