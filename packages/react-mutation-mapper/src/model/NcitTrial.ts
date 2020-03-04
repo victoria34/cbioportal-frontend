@@ -22,4 +22,7 @@ export type IDrug = {
 //     isUSTrial?: boolean;
 // };
 
-
+export type IMatchedTrials = {
+    treatment: string;
+    trials: ITrial[];
+};

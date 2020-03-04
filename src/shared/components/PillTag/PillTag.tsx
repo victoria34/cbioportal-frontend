@@ -16,7 +16,6 @@ export class PillTag extends React.Component<IPillTagProps, {}> {
     get contentColor() {
         let _contrast = contrast(this.props.backgroundColor);
         if (_contrast === 'light') {
-            return '#000';
         } else {
             return '#fff';
         }
