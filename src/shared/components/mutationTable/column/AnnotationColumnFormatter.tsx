@@ -20,17 +20,13 @@ import {
     CancerGene,
     generateQueryVariantId,
     IndicatorQueryResp,
-    Query,DefaultTooltip, ICache
+    Query
 } from "cbioportal-frontend-commons";
 import {getEvidenceQuery} from "shared/lib/OncoKbUtils";
 import {is3dHotspot, isRecurrentHotspot} from "shared/lib/AnnotationUtils";
 import {ICivicVariant, ICivicGene, ICivicEntry, ICivicVariantData, ICivicGeneData, ICivicGeneDataWrapper, ICivicVariantDataWrapper} from "shared/model/Civic.ts";
 import {buildCivicEntry} from "shared/lib/CivicUtils";
-import NcitTrialsCache from "../../../cache/NcitTrialsCache";;
-import TrialsList from "../../../../../packages/react-mutation-mapper/src/component/oncokb/TrialsList";
-import OncoKbTooltip from "../../../../../packages/react-mutation-mapper/src/component/oncokb/OncoKbTooltip";
-import { generateTreatments } from "../../../../../packages/react-mutation-mapper/src/util/OncoKbUtils";
-import { ICacheData } from "../../../../../packages/react-mutation-mapper/src/model/SimpleCache";
+import NcitTrialsCache from "../../../cache/NcitTrialsCache";
 import ClinicalTrials from "../../../../../packages/react-mutation-mapper/src/component/oncokb/ClinicalTrials";
 
 export interface IAnnotationColumnProps {

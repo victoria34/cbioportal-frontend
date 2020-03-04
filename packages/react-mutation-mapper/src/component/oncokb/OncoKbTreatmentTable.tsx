@@ -14,7 +14,6 @@ import SummaryWithRefs from "./SummaryWithRefs";
 
 import mainStyles from './main.module.scss';
 import "./oncoKbTreatmentTable.scss";
-import TrialsList from "./TrialsList";
 
 type OncoKbTreatmentTableProps = {
     // tumorType: string;

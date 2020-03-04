@@ -8,6 +8,8 @@ import {computed} from 'mobx';
 export interface IPillTagProps {
     content: string;
     backgroundColor: string;
+    border?: string;
+    defaultContentColor?: string;
     onDelete?: () => void;
 }
 
@@ -17,14 +19,23 @@ export class PillTag extends React.Component<IPillTagProps, {}> {
     get contentColor() {
         let _contrast = contrast(this.props.backgroundColor);
         if (_contrast === 'light') {
-            return '#000';
+            return this.props.defaultContentColor ? this.props.defaultContentColor : '#000';
         } else {
-            return '#fff'
+            return '#fff';
         }
     }
 
+    @computed
+    get border() {
+        let border = '';
+        if (this.props.border) {
+            border = this.props.border;
+        }
+        return border;
+    }
+
     render() {
-        return (<div className={styles.main} style={{background: this.props.backgroundColor, color: this.contentColor}}>
+        return (<div className={styles.main} style={{background: this.props.backgroundColor, color: this.contentColor, border: this.border}}>
             <span className={styles.content}>{this.props.content}</span>
             <If condition={_.isFunction(this.props.onDelete)}>
                 <span data-test="pill-tag-delete" className={styles.delete} onClick={this.props.onDelete}><i className="fa fa-times-circle"></i></span>
