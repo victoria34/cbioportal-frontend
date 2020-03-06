@@ -5,6 +5,7 @@ import {defaultSortMethod} from "../../util/ReactTableUtils";
 import "./oncoKbTreatmentTable.scss";
 import { ITrial } from "../../model/NcitTrial";
 import styles from './listGroupItem.module.scss';
+import { getTrialStatusColor } from "../../util/OncoKbUtils";
 
 type TrialsTableProps = {
     trials: ITrial[];
@@ -13,16 +14,6 @@ type TrialsTableProps = {
 
 @observer
 export default class TrialsTable extends React.Component<TrialsTableProps> {
-
-    getContentColor(content: string) {
-        content = content.toLowerCase();
-        if (content.includes('open') || content.includes('active')) {
-            return {color: 'green'};
-        } else if (content.includes('close')) {
-            return {color: 'red'};
-        }
-        return {};
-    }
 
     readonly columns = [
         {
@@ -42,7 +33,7 @@ export default class TrialsTable extends React.Component<TrialsTableProps> {
                     {props.original.nctId}
                     </a>
                     <br/>
-                    <span style={this.getContentColor(props.original.currentTrialStatus)}>{props.original.currentTrialStatus}</span>
+                    <span style={getTrialStatusColor(props.original.currentTrialStatus)}>{props.original.currentTrialStatus}</span>
                 </div>
 
         },

@@ -10,7 +10,7 @@ import {SimpleCache} from "../../model/SimpleCache";
 import {errorIcon, loaderIcon} from "../StatusHelpers";
 import './oncokb.scss';
 import 'oncokb-styles/dist/oncokb.css';
-import { extractCancerTypes, generateTreatments, hideArrow, matchedTrials } from "../../util/OncoKbUtils";
+import { extractCancerTypes, generateTreatments, hideArrow, matchTrials } from "../../util/OncoKbUtils";
 import {ICache, ICacheData} from "cbioportal-frontend-commons";
 import mainStyles from './main.module.scss';
 import TrialsTable from "./TrialsTable";
@@ -90,7 +90,7 @@ export default class ClinicalTrials extends React.Component<IClinicalTrialsProps
                     const treatmentButtonList: JSX.Element[] = [];
 
                     filterTreatmentsByTumorType.forEach( ( treatment: OncoKbTreatment ) => {
-                        const trials = matchedTrials( trialsData.data, treatment.treatment );
+                        const trials = matchTrials( trialsData.data, treatment.treatment );
                         if ( trials.length > 0 ) {
                             if (this.selectedTreatment === '') {
                                 this.selectedTreatment = treatment.treatment; // the selected treatment is the 1st treatment by default

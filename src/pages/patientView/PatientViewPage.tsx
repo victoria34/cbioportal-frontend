@@ -55,6 +55,7 @@ import { checkNonProfiledGenesExist } from "./PatientViewPageUtils";
 import PatientViewMutationsTab from "./mutation/PatientViewMutationsTab";
 import PatientViewGenePanelModal from "./PatientViewGenePanelModal/PatientViewGenePanelModal";
 import { PatientViewPageTabs } from "./PatientViewPageTabs";
+import ClinicalTrialsTable from "./ClinicalTrials/ClinicalTrialsTable";
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -211,6 +212,10 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
     private shouldShowTrialMatch(patientViewPageStore: PatientViewPageStore): boolean {
         return getBrowserWindow().localStorage.trialmatch === 'true' &&
             patientViewPageStore.detailedTrialMatches.isComplete && patientViewPageStore.detailedTrialMatches.result.length > 0;
+    }
+
+    private shouldShowClinicalTrials(): boolean {
+        return AppConfig.serverConfig.show_oncokb;
     }
 
 
@@ -672,6 +677,19 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                             </MSKTab>
                         )
                     }
+
+                    {this.shouldShowClinicalTrials() && (
+                        <MSKTab key={8} id={PatientViewPageTabs.ClinicalTrials} linkText="Clinical Trials">
+                            <ClinicalTrialsTable
+                                mutations={this.patientViewPageStore.mergedMutationDataIncludingUncalledFilteredByGene}
+                                trialsCache={this.patientViewPageStore.trialsCache}
+                                oncoKbData={this.patientViewPageStore.oncoKbData}
+                                oncoKbEvidenceCache={this.patientViewPageStore.oncoKbEvidenceCache}
+                                oncoKbCancerGenes={this.patientViewPageStore.oncoKbCancerGenes}
+                                containerWidth={WindowStore.size.width-20}
+                            />
+                        </MSKTab>
+                    )}
 
                     {/*<MSKTab key={5} id={{PatientViewPageTabs.MutationalSignatures}} linkText="Mutational Signature Data" hide={true}>*/}
                         {/*<div className="clearfix">*/}

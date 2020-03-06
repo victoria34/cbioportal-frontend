@@ -26,7 +26,7 @@ import {getEvidenceQuery} from "shared/lib/OncoKbUtils";
 import {is3dHotspot, isRecurrentHotspot} from "shared/lib/AnnotationUtils";
 import {ICivicVariant, ICivicGene, ICivicEntry, ICivicVariantData, ICivicGeneData, ICivicGeneDataWrapper, ICivicVariantDataWrapper} from "shared/model/Civic.ts";
 import {buildCivicEntry} from "shared/lib/CivicUtils";
-import NcitTrialsCache from "../../../cache/NcitTrialsCache";
+import NcitTrialsCache from "shared/cache/NcitTrialsCache";
 import ClinicalTrials from "../../../../../packages/react-mutation-mapper/src/component/oncokb/ClinicalTrials";
 
 export interface IAnnotationColumnProps {

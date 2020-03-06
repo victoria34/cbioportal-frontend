@@ -576,7 +576,7 @@ export function hideArrow(tooltipEl: any) {
     arrowEl.style.display = 'none';
 }
 
-export function matchedTrials(trialsData: ITrial[], treatment: string) {
+export function matchTrials(trialsData: ITrial[], treatment: string) {
     const trials: ITrial[] = [];
     let drugNames: string[] = [];
     if (treatment.includes('+') || treatment.includes(',')){
@@ -592,4 +592,14 @@ export function matchedTrials(trialsData: ITrial[], treatment: string) {
         }
     });
     return trials;
+}
+
+export function getTrialStatusColor(content: string) {
+    content = content.toLowerCase();
+    if (content.includes('open') || content.includes('active')) {
+        return {color: 'green'};
+    } else if (content.includes('close')) {
+        return {color: 'red'};
+    }
+    return {};
 }

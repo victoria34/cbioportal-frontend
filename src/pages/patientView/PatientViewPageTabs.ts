@@ -7,4 +7,5 @@ export enum PatientViewPageTabs {
     MSKTissueImage = "MSKTissueImage",
     TrialMatchTab = "trialMatchTab",
     MutationalSignatures = "mutationalSignatures",
+    ClinicalTrials = "clinicalTrials"
 }

@@ -92,7 +92,7 @@ import {getVariantAlleleFrequency} from "../../../shared/lib/MutationUtils";
 import { AppStore, SiteError } from 'AppStore';
 import { getGeneFilterDefault } from './PatientViewPageStoreUtil';
 import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
-import NcitTrialsCache from "../../../shared/cache/NcitTrialsCache";
+import NcitTrialsCache from "shared/cache/NcitTrialsCache";
 
 type PageMode = 'patient' | 'sample';
 
