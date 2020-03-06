@@ -1360,7 +1360,6 @@ export default class PatientViewPage extends React.Component<
                                         />
                                     </div>
                                 </MSKTab>
-
                                 {this.patientViewPageStore.studyId ===
                                     'mskimpact' &&
                                     this.wholeSlideViewerUrl.result && (
