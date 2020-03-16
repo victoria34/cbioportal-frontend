@@ -82,14 +82,14 @@ export default class ClinicalTrials extends React.Component<IClinicalTrialsProps
             if (cacheData.status === 'complete' && cacheData.data && this.props.evidenceCache && this.props.evidenceQuery)
             {
                 const treatments = generateTreatments(cacheData.data.treatments);
-                const filterTreatmentsByTumorType = treatments.filter((treatment) => treatment.cancerType === this.props.evidenceQuery.tumorType);
+                // const filterTreatmentsByTumorType = treatments.filter((treatment) => treatment.cancerType === this.props.evidenceQuery.tumorType);
                 const trialsCache: ICache<any> = this.trialsData;
                 const trialsData = trialsCache[this.props.evidenceQuery.tumorType];
 
-                if (filterTreatmentsByTumorType && filterTreatmentsByTumorType.length > 0 && trialsData && trialsData.data) {
+                if (treatments && treatments.length > 0 && trialsData && trialsData.data) {
                     const treatmentButtonList: JSX.Element[] = [];
 
-                    filterTreatmentsByTumorType.forEach( ( treatment: OncoKbTreatment ) => {
+                    treatments.forEach( ( treatment: OncoKbTreatment ) => {
                         const trials = matchTrials( trialsData.data, treatment.treatment );
                         if ( trials.length > 0 ) {
                             if (this.selectedTreatment === '') {

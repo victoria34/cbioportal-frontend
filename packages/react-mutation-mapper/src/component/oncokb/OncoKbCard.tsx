@@ -4,14 +4,12 @@ import {action, computed, observable} from "mobx";
 import {observer} from "mobx-react";
 import * as React from 'react';
 import {Collapse} from 'react-collapse';
-import * as _ from 'lodash';
 
 import {Citations, OncoKbTreatment} from "../../model/OncoKb";
 import {ICache} from "../../model/SimpleCache";
 import {levelIconClassNames} from "../../util/OncoKbUtils";
 import OncoKBSuggestAnnotationLinkout from "./OncoKBSuggestAnnotationLinkout";
 import OncoKbTreatmentTable from "./OncoKbTreatmentTable";
-import ClinicalTrialTable from "./ClinicalTrialTable";
 import OncoKbHelper from "./OncoKbHelper";
 import ReferenceList from "./ReferenceList";
 import SummaryWithRefs from "./SummaryWithRefs";
@@ -154,34 +152,12 @@ export default class OncoKbCard extends React.Component<OncoKbCardProps>
 
                                                 {this.props.treatments!.length > 0 &&
                                                     <div style={{ marginTop: 10 }}>
-                                                        <Tabs id="controlled-tab-example" defaultActiveKey="therapy">
-                                                            <Tab eventKey="therapy" title="OncoKB Therapy">
-                                                                <OncoKbTreatmentTable
-                                                                    pmidData={this.props.pmidData!}
-                                                                    treatments={this.props.treatments!}
-                                                                />
-                                                            </Tab>
-                                                            <Tab eventKey="trials" title="Clinical Trials">
-                                                                {/*<ClinicalTrialTable*/}
-                                                                    {/*cancerType={_.upperFirst(this.props.tumorType!)}*/}
-                                                                    {/*trialsData={this.props.trialsData!}*/}
-                                                                    {/*treatments={this.props.treatments!}*/}
-                                                                {/*/>*/}
-                                                            </Tab>
-                                                        </Tabs>
+                                                        <OncoKbTreatmentTable
+                                                            pmidData={this.props.pmidData!}
+                                                            treatments={this.props.treatments!}
+                                                        />
                                                     </div>
                                                 }
-
-                                                {/*{this.props.treatments!.length > 0 &&*/}
-                                                    {/*<div style={{marginTop: 10}}>*/}
-                                                        {/*<OncoKbTreatmentTable*/}
-                                                            {/*tumorType={this.props.tumorType!}*/}
-                                                            {/*pmidData={this.props.pmidData!}*/}
-                                                            {/*trialsData={this.props.trialsData!}*/}
-                                                            {/*treatments={this.props.treatments!}*/}
-                                                        {/*/>*/}
-                                                    {/*</div>*/}
-                                                {/*}*/}
                                             </div>
                                         </div>
                                     }

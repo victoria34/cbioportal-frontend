@@ -16,9 +16,7 @@ import mainStyles from './main.module.scss';
 import "./oncoKbTreatmentTable.scss";
 
 type OncoKbTreatmentTableProps = {
-    // tumorType: string;
     treatments: OncoKbTreatment[];
-    // trialsData?: ICache<any>;
     pmidData: ICache<any>;
 };
 
@@ -42,25 +40,6 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
                 </div>
             ) : <span/>
     };
-
-    // trialTooltipContent = (treatment: string, cancerType: string, trialsData: ICache<any>) => {
-    //     return (!_.isUndefined(trialsData)) ?
-    //         () => (
-    //             <TrialsList
-    //                 cancerType={cancerType}
-    //                 treatment={treatment}
-    //                 trialsData={trialsData}
-    //             />
-    //         ) : <span/>
-    // };
-
-    // isTrialsTooltipAvailable(patientCanerType: string, oncokbCancerType: string) {
-    //     const specialTumorTypes = ['all tumors', 'all solid tumors', 'all liquid tumors'];
-    //     if () {
-    //         return true;
-    //     }
-    //     return false;
-    // }
 
     readonly columns = [
         {
@@ -141,28 +120,6 @@ export default class OncoKbTreatmentTable extends React.Component<OncoKbTreatmen
                     <i className="fa fa-book"/>
                 </DefaultTooltip>
         }
-        // {
-        //     id: "trialList",
-        //     Header: <span><b>Trials</b></span>,
-        //     sortable: false,
-        //     maxWidth: 50,
-        //     style: {textAlign: "center" },
-        //     Cell: (props: {original: OncoKbTreatment}) =>
-        //         (props.original.cancerType.toLowerCase() === this.props.tumorType.toLowerCase() || []) &&
-        //         <DefaultTooltip
-        //             overlay={
-        //                 this.trialTooltipContent(
-        //                     props.original.treatment,
-        //                     props.original.cancerType,
-        //                     this.props.trialsData)
-        //             }
-        //             placement="right"
-        //             trigger={['hover', 'focus']}
-        //             destroyTooltipOnHide={false}
-        //         >
-        //             <i className="fa fa-medkit"/>
-        //         </DefaultTooltip>
-        // }
     ];
 
     public render() {
